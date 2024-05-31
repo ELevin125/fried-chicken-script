@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FriedChickenScript": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\testScript.fc"
+    }
+  }
+}
