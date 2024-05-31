@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 namespace FriedChickenScript;
 
 public class Lexer
@@ -24,10 +24,16 @@ public class Lexer
             }
 
             Token token = NextToken();
+
             if (token != null)
-                tokens.Add(token);
+            {
+                if (token.Type != TokenType.Comment)
+                    tokens.Add(token);
+            }
             else
+            {
                 throw new Exception($"Unexpected character: {rawProgram[matchPos]}");
+            }
         }
 
         return tokens;
@@ -46,7 +52,6 @@ public class Lexer
                 return new Token(pattern.Value, match.Value);
             }
         }
-
         return null;
     }
 }

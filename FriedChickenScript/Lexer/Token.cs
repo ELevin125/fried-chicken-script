@@ -6,10 +6,9 @@ public enum TokenType
     Identifier,
     Operator,
     Literal,
-    LeftParen,
-    RightParen,
-    LeftBrace,
-    RightBrace,
+    Paren,
+    Brace,
+    Comment
 }
 
 public class Token

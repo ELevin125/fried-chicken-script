@@ -3,6 +3,7 @@
 public static class TokenPatterns
 {
     public static readonly Dictionary<string, TokenType> Patterns = new Dictionary<string, TokenType> {
+        { @"\/\/.*", TokenType.Comment },
         { @"\bingredient\b", TokenType.Keyword }, // variable
         { @"\brecipe\b", TokenType.Keyword }, // function
         { @"\bserve\b", TokenType.Keyword }, // return
@@ -15,9 +16,7 @@ public static class TokenPatterns
         { @"\*", TokenType.Operator },
         { @"[0-9]+", TokenType.Literal }, // number
         { @"""[^""]*""", TokenType.Literal }, // string ""
-        { @"\(", TokenType.LeftParen },
-        { @"\)", TokenType.RightParen },
-        { @"\{", TokenType.LeftBrace },
-        { @"\}", TokenType.RightBrace },
+        { @"[\(\)]", TokenType.Paren }, // ()
+        { @"[\{\}]", TokenType.Brace }, // {}
     };
 }
