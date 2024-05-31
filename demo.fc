@@ -1,0 +1,52 @@
+// var		|	ingredient
+// const	|	secretSpice
+// struct	|	bucket
+// func		|	recipe
+// return	|	serve
+// param	|	withExtras
+// while	|	fryUntil
+
+
+// Const Declaration
+secretSpice chickenParts = ["wing", "thigh", "breast"]
+
+// Struct Definition
+bucket Order {
+	ingredient recipeName
+    ingredients chickenPieces
+    ingredients isSpicy
+}
+
+bucket Meal {
+    ingredients mealContent
+    ingredients isSpicy
+}
+
+// Function Declaration
+recipe cookChicken withExtras: chickenPieces, isSpicy {
+	ingredient mealContent = ""
+	
+	ingredient i = 0
+	fryUntil(i < chickenPieces) {
+		mealContent.concat(random(chickenParts))
+	}
+	
+	Meal myMeal
+	myMeal.mealContent = mealContent
+	myMeal.isSpicy = isSpicy
+	
+	serve myMeal
+}
+
+// Main Execution
+recipe main() {
+    // Create an instance of ChickenBucket
+    Order myBucket
+    myBucket.recipeName = "Original"
+    myBucket.chickenPieces = 8
+    myBucket.isSpicy = true
+
+    // Cook Chicken
+    Meal myMeal = cookChicken(myBucket.chickenPieces, myBucket.isSpicy)
+	print(myMeal.mealContent)
+}

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FriedChickenScript", "FriedChickenScript.csproj", "{D6630A25-14C4-41F9-B99C-F57620D2665D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6630A25-14C4-41F9-B99C-F57620D2665D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6630A25-14C4-41F9-B99C-F57620D2665D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6630A25-14C4-41F9-B99C-F57620D2665D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6630A25-14C4-41F9-B99C-F57620D2665D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E5639D30-65AF-43F5-B082-18A4B8A2CFAB}
+	EndGlobalSection
+EndGlobal
