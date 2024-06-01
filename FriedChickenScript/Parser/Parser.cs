@@ -37,10 +37,31 @@ public class Parser
                 return ParseFunctionReturn();
             case Syntax.If:
                 return ParseIfStatement();
+            case Syntax.While:
+                return ParseWhileStatement();
             default:
+                // Check if the statement is an assignment
+                if (GetCurrentToken()?.Type == TokenType.Identifier && tokens[tokenIndex + 1]?.Value == Syntax.Assignment)
+                {
+                    return ParseAssignment();
+                }
+
                 return ParseExpression();
         }
     }
+
+    private ASTNode ParseAssignment()
+    {
+        Token identifierToken = Consume(TokenType.Identifier);
+        Consume(TokenType.Operator, Syntax.Assignment);
+
+        ASTNode assignmentNode = new ASTNode(NodeType.Assignment, identifierToken.Value);
+
+        assignmentNode.AddChild(ParseExpression());
+
+        return assignmentNode;
+    }
+
 
     private ASTNode ParseFunctionReturn()
     {
@@ -269,6 +290,25 @@ public class Parser
         }
 
         return ifNode;
+    }
+
+    private ASTNode ParseWhileStatement()
+    {
+        Consume(TokenType.Keyword, Syntax.While);
+
+        ASTNode loopNode = new ASTNode(NodeType.WhileStatement);
+
+        // Parse condition
+        Consume(TokenType.LeftParen);
+        loopNode.AddChild(ParseExpression());
+        Consume(TokenType.RightParen);
+
+        // Parse if block
+        Consume(TokenType.LeftBrace);
+        loopNode.AddChild(ParseBlock());
+        Consume(TokenType.RightBrace);
+
+        return loopNode;
     }
 
 

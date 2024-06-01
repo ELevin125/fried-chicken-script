@@ -16,6 +16,7 @@ public enum NodeType
     Identifier,
     Literal,
     IfStatement,
+    WhileStatement,
     ComparisonExpression
 }
 
