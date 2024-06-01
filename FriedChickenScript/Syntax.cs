@@ -7,6 +7,7 @@ public static class Syntax
     public const string Function = "recipe";
     public const string Struct = "bucket";
     public const string Return = "serve";
+    public const string Print = "print";
 
     // Operators
     public const string Addition = "+";

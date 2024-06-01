@@ -4,10 +4,10 @@ public static class TokenPatterns
 {
     public static readonly Dictionary<string, TokenType> Patterns = new Dictionary<string, TokenType> {
         { @"\/\/.*", TokenType.Comment },
-        { @"\bingredient\b", TokenType.Keyword }, // variable
-        { @"\brecipe\b", TokenType.Keyword }, // function
-        { @"\bserve\b", TokenType.Keyword }, // return
-        { @"\bprint\b", TokenType.Keyword },
+        { $@"\b{Syntax.Variable}\b", TokenType.Keyword },
+        { $@"\b{Syntax.Function}\b", TokenType.Keyword },
+        { $@"\b{Syntax.Return}\b", TokenType.Keyword },
+        { $@"\b{Syntax.Print}\b", TokenType.Keyword },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
         { @"=", TokenType.Operator },
         { @"\+", TokenType.Operator },
