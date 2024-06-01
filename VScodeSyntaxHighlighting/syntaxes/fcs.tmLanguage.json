@@ -1,0 +1,60 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "FriedChicken Script",
+	"patterns": [
+
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#function_calls"
+        },
+        {
+            "include": "#structs"
+        }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control",
+                    "match": "\\b(withExtra|serve|if|else|fryWhile|COOKED|RAW)\\b"
+                },
+                {
+                    "name": "storage.type",
+                    "match": "\\b(ingredient|secretSpice|recipe)\\b"
+                },
+                {
+                    "name": "keyword.operator",
+                    "match": "\\+|-|\\*|/|%|\\^|>|<|==|!=|>=|<=|&&|\\|\\||\\?|:|\\[|\\]|\\{|\\}|\\(|\\)|;|,|=|\\."
+                }
+            ]
+        },
+
+        "escape_chars": {
+            "patterns": [
+                {
+                    "name": "constant.character.escape",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "function_calls": {
+            "patterns": [
+                {
+                    "name": "entity.name.function",
+                    "match": "\\b\\w+\\s*\\("
+                }
+            ]
+        },
+        "structs": {
+            "patterns": [
+                {
+                    "name": "entity.name.class",
+                    "match": "\\b(bucket)\\b"
+                }
+            ]
+        }
+    },
+	"scopeName": "source.fc"
+}

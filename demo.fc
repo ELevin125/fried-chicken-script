@@ -4,7 +4,7 @@
 // func		|	recipe
 // return	|	serve
 // param	|	withExtras
-// while	|	fryUntil
+// while	|	fryWhile
 // true		|	COOKED
 // false	|	RAW
 

@@ -1,0 +1,25 @@
+{
+  "name": "fcs",
+  "displayName": "FCS",
+  "description": "FCS Scripting Language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.89.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "fcs",
+      "aliases": ["FriedChicken Script", "fcs"],
+      "extensions": [".fc"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "fcs",
+      "scopeName": "source.fc",
+      "path": "./syntaxes/fcs.tmLanguage.json"
+    }]
+  }
+}
