@@ -6,8 +6,10 @@ public enum TokenType
     Identifier,
     Operator,
     Literal,
-    Paren,
-    Brace,
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
     Comment
 }
 

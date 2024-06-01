@@ -16,7 +16,9 @@ public static class TokenPatterns
         { @"\*", TokenType.Operator },
         { @"[0-9]+", TokenType.Literal }, // number
         { @"""[^""]*""", TokenType.Literal }, // string ""
-        { @"[\(\)]", TokenType.Paren }, // ()
-        { @"[\{\}]", TokenType.Brace }, // {}
+        { @"\(", TokenType.LeftParen },
+        { @"\)", TokenType.RightParen },
+        { @"\{", TokenType.LeftBrace },
+        { @"\}", TokenType.RightBrace },
     };
 }
