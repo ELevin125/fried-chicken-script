@@ -15,6 +15,8 @@ public enum NodeType
     PrintStatement,
     Identifier,
     Literal,
+    IfStatement,
+    ComparisonExpression
 }
 
 public class ASTNode

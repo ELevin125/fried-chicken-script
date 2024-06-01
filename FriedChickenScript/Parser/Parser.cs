@@ -35,6 +35,8 @@ public class Parser
                 return ParseFunctionDeclaration();
             case Syntax.Return:
                 return ParseFunctionReturn();
+            case Syntax.If:
+                return ParseIfStatement();
             default:
                 return ParseExpression();
         }
@@ -123,7 +125,9 @@ public class Parser
     {
         ASTNode parsed = ParsePrimary();
         parsed = ParseMultDiv(parsed);
-        return ParseAddSub(parsed);
+        parsed = ParseAddSub(parsed);
+        parsed = ParseComparison(parsed);
+        return parsed;
     }
 
     private ASTNode ParseAddSub(ASTNode current)
@@ -157,6 +161,26 @@ public class Parser
             binaryExpression.AddChild(node);
             binaryExpression.AddChild(right);
             node = binaryExpression;
+        }
+
+        return node;
+    }
+
+    private ASTNode ParseComparison(ASTNode current)
+    {
+        ASTNode node = current;
+
+        while (GetCurrentToken()?.Type == TokenType.Operator &&
+               (GetCurrentToken()?.Value == Syntax.LessThan || GetCurrentToken()?.Value == Syntax.GreaterThan ||
+                GetCurrentToken()?.Value == "<=" || GetCurrentToken()?.Value == ">=" ||
+                GetCurrentToken()?.Value == "==" || GetCurrentToken()?.Value == "!="))
+        {
+            Token operatorToken = Consume(TokenType.Operator);
+            ASTNode right = ParsePrimary();
+            ASTNode comparisonExpression = new ASTNode(NodeType.BinaryExpression, operatorToken.Value);
+            comparisonExpression.AddChild(node);
+            comparisonExpression.AddChild(right);
+            node = comparisonExpression;
         }
 
         return node;
@@ -216,6 +240,37 @@ public class Parser
         Consume(TokenType.RightParen);
         return funcCallNode;
     }
+
+    private ASTNode ParseIfStatement()
+    {
+        Consume(TokenType.Keyword, Syntax.If);
+
+        ASTNode ifNode = new ASTNode(NodeType.IfStatement);
+
+        // Parse condition
+        Consume(TokenType.LeftParen);
+        ifNode.AddChild(ParseExpression());
+        Consume(TokenType.RightParen);
+
+        // Parse if block
+        Consume(TokenType.LeftBrace);
+        ifNode.AddChild(ParseBlock());
+        Consume(TokenType.RightBrace);
+
+        // Check for else block
+        if (GetCurrentToken()?.Value == Syntax.Else)
+        {
+            Consume(TokenType.Keyword, Syntax.Else);
+
+            // Parse else block
+            Consume(TokenType.LeftBrace);
+            ifNode.AddChild(ParseBlock());
+            Consume(TokenType.RightBrace);
+        }
+
+        return ifNode;
+    }
+
 
     private Token Consume(TokenType type, string value = null)
     {

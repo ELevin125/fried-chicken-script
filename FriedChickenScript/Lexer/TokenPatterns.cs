@@ -9,6 +9,8 @@ public static class TokenPatterns
         { $@"\b{Syntax.Function}\b", TokenType.Keyword },
         { $@"{Syntax.Parameter}", TokenType.Keyword },
         { $@"\b{Syntax.Return}\b", TokenType.Keyword },
+        { $@"\b{Syntax.If}\b", TokenType.Keyword },
+        { $@"\b{Syntax.Else}\b", TokenType.Keyword },
         { $@"\b{Syntax.Print}\b", TokenType.Keyword },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
         { @",", TokenType.Delimiter },
@@ -17,6 +19,12 @@ public static class TokenPatterns
         { @"\-", TokenType.Operator },
         { @"\/", TokenType.Operator },
         { @"\*", TokenType.Operator },
+        { @"==", TokenType.Operator }, 
+        { @"!=", TokenType.Operator },
+        { @"<", TokenType.Operator },
+        { @">", TokenType.Operator },
+        { @">=", TokenType.Operator },
+        { @"<=", TokenType.Operator },
         { @"[0-9]+", TokenType.Literal }, // number
         { @"""[^""]*""", TokenType.Literal }, // string ""
         { @"\(", TokenType.LeftParen },

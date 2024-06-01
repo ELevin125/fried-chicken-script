@@ -8,6 +8,8 @@ public static class Syntax
     public const string Parameter = "withExtra:";
     public const string Struct = "bucket";
     public const string Return = "serve";
+    public const string If = "if";
+    public const string Else = "else";
     public const string Print = "print";
 
     // Operators
@@ -22,4 +24,6 @@ public static class Syntax
     public const string Inequality = "!=";
     public const string LessThan = "<";
     public const string GreaterThan = ">";
+    public const string EqLessThan = ">=";
+    public const string EqGreaterThan = "<=";
 }
