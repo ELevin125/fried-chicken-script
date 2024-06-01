@@ -54,32 +54,32 @@ public class Parser
     }
     private ASTNode ParseExpression()
     {
-
-        return ParseAddition();
+        ASTNode parsed = ParsePrimary();
+        parsed = ParseMultDiv(parsed);
+        return ParseAddSub(parsed);
     }
 
-    private ASTNode ParseAddition()
+    private ASTNode ParseAddSub(ASTNode current)
     {
-        ASTNode left = ParseMultiplication(); // Parse the left operand
+        ASTNode node = current;
 
         while (GetCurrentToken()?.Type == TokenType.Operator
            && (GetCurrentToken()?.Value == Syntax.Addition || GetCurrentToken()?.Value == Syntax.Subtraction))
         {
             Token operatorToken = Consume(TokenType.Operator, GetCurrentToken().Value);
-            ASTNode right = ParseMultiplication();
+            ASTNode right = ParseExpression();
             ASTNode binaryExpression = new ASTNode(NodeType.BinaryExpression, operatorToken.Value);
-            binaryExpression.AddChild(left);
+            binaryExpression.AddChild(node);
             binaryExpression.AddChild(right);
-            left = binaryExpression; // Update left to be the binary expression node
+            node = binaryExpression;
         }
 
-        return left;
+        return node;
     }
 
-
-    private ASTNode ParseMultiplication()
+    private ASTNode ParseMultDiv(ASTNode current)
     {
-        ASTNode left = ParsePrimary(); // Parse the left operand
+        ASTNode node = current;
 
         while (GetCurrentToken()?.Type == TokenType.Operator
            && (GetCurrentToken()?.Value == Syntax.Multiplication) || GetCurrentToken()?.Value == Syntax.Division)
@@ -87,12 +87,12 @@ public class Parser
             Token operatorToken = Consume(TokenType.Operator, GetCurrentToken().Value);
             ASTNode right = ParsePrimary();
             ASTNode binaryExpression = new ASTNode(NodeType.BinaryExpression, operatorToken.Value);
-            binaryExpression.AddChild(left);
+            binaryExpression.AddChild(node);
             binaryExpression.AddChild(right);
-            left = binaryExpression; // Update left to be the binary expression node
+            node = binaryExpression;
         }
 
-        return left;
+        return node;
     }
 
     private ASTNode ParsePrimary()

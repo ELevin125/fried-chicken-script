@@ -5,6 +5,8 @@
 // return	|	serve
 // param	|	withExtras
 // while	|	fryUntil
+// true		|	COOKED
+// false	|	RAW
 
 
 // Const Declaration
@@ -44,7 +46,7 @@ recipe main() {
     Order myBucket
     myBucket.recipeName = "Original"
     myBucket.chickenPieces = 8
-    myBucket.isSpicy = true
+    myBucket.isSpicy = COOKED
 
     // Cook Chicken
     Meal myMeal = cookChicken(myBucket.chickenPieces, myBucket.isSpicy)
