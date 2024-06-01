@@ -25,7 +25,7 @@ public class Parser
 
     private ASTNode ParseStatement()
     {
-        Token token = tokens[tokenIndex];
+        Token token = GetCurrentToken();
 
         switch (token.Value)
         {
@@ -33,11 +33,19 @@ public class Parser
                 return ParseVariableDeclaration();
             case Syntax.Function:
                 return ParseFunctionDeclaration();
-            //default:
-            //    return ParseExpression();
+            case Syntax.Return:
+                return ParseFunctionReturn();
+            default:
+                return ParseExpression();
         }
+    }
 
-        return null;
+    private ASTNode ParseFunctionReturn()
+    {
+        ASTNode returnNode = new ASTNode(NodeType.ReturnStatement);
+        Consume(TokenType.Keyword, Syntax.Return);
+        returnNode.AddChild(ParseExpression());
+        return returnNode;
     }
 
     private ASTNode ParseFunctionDeclaration() 
@@ -166,6 +174,10 @@ public class Parser
         else if (currentToken.Type == TokenType.Identifier)
         {
             Token identifierToken = Consume(TokenType.Identifier);
+            if (GetCurrentToken()?.Type == TokenType.LeftParen)
+            {
+                return ParseFunctionCall(identifierToken);
+            }
             return new ASTNode(NodeType.Identifier, identifierToken.Value);
         }
         else if (currentToken.Type == TokenType.LeftParen)
@@ -179,6 +191,30 @@ public class Parser
         {
             throw new Exception("Unexpected token: " + currentToken.Type);
         }
+    }
+
+    private ASTNode ParseFunctionCall(Token functionNameToken)
+    {
+        ASTNode funcCallNode = new ASTNode(NodeType.FunctionCall, functionNameToken.Value);
+        Consume(TokenType.LeftParen);
+
+        ASTNode args = new ASTNode(NodeType.Arguments);
+        while (GetCurrentToken().Type != TokenType.RightParen)
+        {
+            ASTNode argument = ParseExpression();
+            args.AddChild(argument);
+
+            if (GetCurrentToken().Type == TokenType.Delimiter)
+                Consume(TokenType.Delimiter);
+            else
+                break;
+        }
+        if (args.Children.Count > 0)
+        {
+            funcCallNode.AddChild(args);
+        }
+        Consume(TokenType.RightParen);
+        return funcCallNode;
     }
 
     private Token Consume(TokenType type, string value = null)

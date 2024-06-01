@@ -5,6 +5,7 @@ public enum NodeType
     Program,
     FunctionDeclaration,
     Parameter,
+    Arguments,
     Block,
     ReturnStatement,
     BinaryExpression,

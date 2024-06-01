@@ -10,9 +10,9 @@ class Program
         Lexer lexer = new Lexer(script);
         List<Token> tokens = lexer.Tokenise();
         Console.WriteLine("Processing...");
-        //Console.WriteLine("-----------------------------------------");
-        //tokens.ForEach(t => Console.WriteLine(t.ToString()));
-        
+        Console.WriteLine("-----------------------------------------");
+        tokens.ForEach(t => Console.WriteLine(t.ToString()));
+
         Console.WriteLine("-----------------------------------------");
         Parser parser = new Parser(tokens);
         ASTNode ASTRoot = parser.Parse();
