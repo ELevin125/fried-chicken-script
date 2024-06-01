@@ -4,6 +4,7 @@ public static class TokenPatterns
 {
     public static readonly Dictionary<string, TokenType> Patterns = new Dictionary<string, TokenType> {
         { @"\/\/.*", TokenType.Comment },
+        { @"\/\*[\s\S]*?\*\/", TokenType.Comment },
         { $@"\b{Syntax.Variable}\b", TokenType.Keyword },
         { $@"\b{Syntax.Function}\b", TokenType.Keyword },
         { $@"{Syntax.Parameter}", TokenType.Keyword },
