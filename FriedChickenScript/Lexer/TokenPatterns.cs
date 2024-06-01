@@ -6,9 +6,11 @@ public static class TokenPatterns
         { @"\/\/.*", TokenType.Comment },
         { $@"\b{Syntax.Variable}\b", TokenType.Keyword },
         { $@"\b{Syntax.Function}\b", TokenType.Keyword },
+        { $@"{Syntax.Parameter}", TokenType.Keyword },
         { $@"\b{Syntax.Return}\b", TokenType.Keyword },
         { $@"\b{Syntax.Print}\b", TokenType.Keyword },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
+        { @",", TokenType.Delimiter },
         { @"=", TokenType.Operator },
         { @"\+", TokenType.Operator },
         { @"\-", TokenType.Operator },

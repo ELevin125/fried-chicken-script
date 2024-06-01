@@ -5,6 +5,7 @@ public static class Syntax
     // Keywords
     public const string Variable = "ingredient";
     public const string Function = "recipe";
+    public const string Parameter = "withExtra:";
     public const string Struct = "bucket";
     public const string Return = "serve";
     public const string Print = "print";

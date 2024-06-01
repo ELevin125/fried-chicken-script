@@ -31,11 +31,70 @@ public class Parser
         {
             case Syntax.Variable:
                 return ParseVariableDeclaration();
+            case Syntax.Function:
+                return ParseFunctionDeclaration();
             //default:
             //    return ParseExpression();
         }
 
         return null;
+    }
+
+    private ASTNode ParseFunctionDeclaration() 
+    {
+        // func identifier { }
+        // func identifier withParams: paramA, paramB { }
+
+        Consume(TokenType.Keyword, Syntax.Function);
+
+        Token name = Consume(TokenType.Identifier);
+
+        ASTNode funcNode = new ASTNode(NodeType.FunctionDeclaration, name.Value);
+
+        if (GetCurrentToken().Value == Syntax.Parameter)
+        {
+            Consume(TokenType.Keyword, Syntax.Parameter);
+            while (GetCurrentToken().Type != TokenType.LeftBrace)
+            {
+                // 
+                Token param = Consume(TokenType.Identifier);
+                ASTNode paramNode = new ASTNode(NodeType.Parameter, param.Value);
+                if (GetCurrentToken().Value == Syntax.Assignment)
+                {
+                    Consume(TokenType.Operator, Syntax.Assignment);
+                    paramNode.AddChild(new ASTNode(NodeType.Literal, GetCurrentToken().Value));
+                    Consume(TokenType.Literal);
+                }
+                else
+                {
+                    paramNode.AddChild(new ASTNode(NodeType.Literal, null));
+                }
+
+                funcNode.AddChild(paramNode);
+
+                if (GetCurrentToken().Type == TokenType.Delimiter)
+                {
+                    Consume(TokenType.Delimiter);
+                }
+            }
+        }
+
+        Consume(TokenType.LeftBrace);
+        funcNode.AddChild(ParseBlock());
+        Consume(TokenType.RightBrace);
+        return funcNode;
+    }
+
+    private ASTNode ParseBlock()
+    {
+        ASTNode blockNode = new ASTNode(NodeType.Block);
+
+        while (GetCurrentToken().Type != TokenType.RightBrace && tokenIndex < tokens.Count)
+        {
+            blockNode.AddChild(ParseStatement());
+        }
+
+        return blockNode;
     }
 
 
@@ -127,7 +186,7 @@ public class Parser
         Token token = tokens[tokenIndex];
         if (token.Type != type || (value != null && token.Value != value))
         {
-            throw new Exception($"Expected {type} {value}, but got {token.Type} {token.Value}");
+            throw new Exception($"Expected {type} {value}, but got {token.Type} '{token.Value}'");
         }
         tokenIndex++;
         return token;
