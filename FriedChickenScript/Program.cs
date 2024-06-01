@@ -9,13 +9,14 @@ class Program
 
         Lexer lexer = new Lexer(script);
         List<Token> tokens = lexer.Tokenise();
-        Parser parser = new Parser(tokens);
-        ASTNode ASTRoot = parser.Parse();
-
         Console.WriteLine("Processing...");
         Console.WriteLine("-----------------------------------------");
         tokens.ForEach(t => Console.WriteLine(t.ToString()));
         Console.WriteLine("-----------------------------------------");
+
+        Parser parser = new Parser(tokens);
+        ASTNode ASTRoot = parser.Parse();
+
         PrintTree(ASTRoot);
         Console.WriteLine("-----------------------------------------");
     }

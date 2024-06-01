@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace FriedChickenScript;
+﻿namespace FriedChickenScript;
 
 public enum NodeType
 {
