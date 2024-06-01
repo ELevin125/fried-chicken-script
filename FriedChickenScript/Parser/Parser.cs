@@ -106,8 +106,8 @@ public class Parser
         }
         else if (currentToken.Type == TokenType.Identifier)
         {
-            Consume(TokenType.Literal);
-            return new ASTNode(NodeType.Identifier, currentToken.Value);
+            Token identifierToken = Consume(TokenType.Identifier);
+            return new ASTNode(NodeType.Identifier, identifierToken.Value);
         }
         else if (currentToken.Type == TokenType.LeftParen)
         {
@@ -121,53 +121,6 @@ public class Parser
             throw new Exception("Unexpected token: " + currentToken.Type);
         }
     }
-
-
-    //private ASTNode ParseExpression()
-    //{
-    //    // Handle binary expressions and function calls
-    //    ASTNode left = ParsePrimary();
-
-    //    if (tokens[tokenIndex].Type == TokenType.Operator && tokens[tokenIndex].Value == "+")
-    //    {
-    //        Token op = Consume(TokenType.Operator, "+");
-    //        ASTNode right = ParsePrimary();
-    //        ASTNode binaryExpr = new ASTNode(NodeType.BinaryExpression, op.Value);
-    //        binaryExpr.AddChild(left);
-    //        binaryExpr.AddChild(right);
-    //        return binaryExpr;
-    //    }
-
-    //    return left;
-    //}
-
-    //private ASTNode ParsePrimary()
-    //{
-    //    Token token = tokens[tokenIndex];
-
-    //    if (token.Type == TokenType.Identifier)
-    //    {
-    //        tokenIndex++;
-    //        if (tokens[tokenIndex].Type == TokenType.LeftParen)
-    //        {
-    //            // Function call
-    //            Consume(TokenType.LeftParen);
-    //            ASTNode funcCall = new ASTNode(NodeType.FunctionCall, token.Value);
-    //            funcCall.AddChild(ParseExpression());
-    //            Consume(TokenType.RightParen);
-    //            return funcCall;
-    //        }
-    //        return new ASTNode(NodeType.Identifier, token.Value);
-    //    }
-
-    //    if (token.Type == TokenType.Number)
-    //    {
-    //        tokenIndex++;
-    //        return new ASTNode(NodeType.Number, token.Value);
-    //    }
-
-    //    throw new Exception($"Unexpected token: {token}");
-    //}
 
     private Token Consume(TokenType type, string value = null)
     {
