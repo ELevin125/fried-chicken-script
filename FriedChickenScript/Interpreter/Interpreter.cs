@@ -24,6 +24,7 @@ public class Interpreter
                         return value;
                 }
                 break;
+
             case NodeType.VariableDeclaration:
                 if (variables.ContainsKey(node.Value))
                     throw new InvalidOperationException($"The variable '{node.Value}' is already defined");
@@ -31,6 +32,7 @@ public class Interpreter
                 returnedVal = InterpretExpression(node.Children.First());
                 variables[node.Value] = returnedVal;
                 break;
+
             case NodeType.Assignment:
                 if (!variables.ContainsKey(node.Value))
                     throw new InvalidOperationException($"The variable '{node.Value}' does not exist in the current context");
@@ -38,15 +40,25 @@ public class Interpreter
                 returnedVal = InterpretExpression(node.Children.First());
                 variables[node.Value] = returnedVal;
                 break;
+
             case NodeType.FunctionDeclaration:
                 InterpretFunction(node);
                 break;
+
             case NodeType.FunctionCall:
+                // This function call does not trigger when assigning a value to a variable
+                // only when called standalone 
                 ExecuteFunction(node);
                 break;
+
             case NodeType.ReturnStatement:
-                object returnValue = InterpretExpression(node.Children.First());
-                return returnValue;
+                returnedVal = InterpretExpression(node.Children.First());
+                return returnedVal;
+
+            case NodeType.IfStatement:
+                returnedVal = InterpretIfStatement(node);
+                return returnedVal;
+
             default:
                 throw new InvalidOperationException($"Unhandled node type: {node.Type}");
         }
@@ -60,6 +72,25 @@ public class Interpreter
         {
             Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
         }
+    }
+
+    private object InterpretIfStatement(ASTNode node)
+    {
+
+        bool condition = (bool)InterpretExpression(node.Children[0]);
+        if (condition)
+        {
+            var ifBody = node.Children[1];
+            var value = ExecuteBlock(ifBody, variables);
+            return value;
+        }
+        else if (node.Children.Count > 1)
+        {
+            var elseBody = node.Children[2];
+            var value = ExecuteBlock(elseBody, variables);
+            return value;
+        }
+        return null;
     }
 
     private void InterpretFunction(ASTNode node)

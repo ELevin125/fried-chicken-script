@@ -15,17 +15,17 @@ public static class TokenPatterns
         { $@"\b{Syntax.Print}\b", TokenType.Keyword },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
         { @",", TokenType.Delimiter },
+        { @"==", TokenType.Operator },
+        { @"!=", TokenType.Operator },
+        { @">=", TokenType.Operator },
+        { @"<=", TokenType.Operator },
+        { @"<", TokenType.Operator },
+        { @">", TokenType.Operator },
         { @"=", TokenType.Operator },
         { @"\+", TokenType.Operator },
         { @"\-", TokenType.Operator },
         { @"\/", TokenType.Operator },
         { @"\*", TokenType.Operator },
-        { @"==", TokenType.Operator }, 
-        { @"!=", TokenType.Operator },
-        { @"<", TokenType.Operator },
-        { @">", TokenType.Operator },
-        { @">=", TokenType.Operator },
-        { @"<=", TokenType.Operator },
         { @"[0-9]+", TokenType.Literal }, // number
         { @"""[^""]*""", TokenType.Literal }, // string ""
         { @"\(", TokenType.LeftParen },
