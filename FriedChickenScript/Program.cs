@@ -10,8 +10,8 @@ class Program
         Lexer lexer = new Lexer(script);
         List<Token> tokens = lexer.Tokenise();
         Console.WriteLine("Processing...");
-        Console.WriteLine("-----------------------------------------");
-        tokens.ForEach(t => Console.WriteLine(t.ToString()));
+        //Console.WriteLine("-----------------------------------------");
+        //tokens.ForEach(t => Console.WriteLine(t.ToString()));
 
         Console.WriteLine("-----------------------------------------");
         Parser parser = new Parser(tokens);
@@ -19,6 +19,9 @@ class Program
 
         PrintTree(ASTRoot);
         Console.WriteLine("-----------------------------------------");
+        Interpreter interpreter = new Interpreter();
+        interpreter.Interpret(ASTRoot);
+        interpreter.PrintVariables();
     }
 
     static void PrintTree(ASTNode node, string indent = "", bool last = true)
