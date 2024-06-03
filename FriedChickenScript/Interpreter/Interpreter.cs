@@ -1,4 +1,5 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.Diagnostics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FriedChickenScript;
 
@@ -9,28 +10,33 @@ public class Interpreter
 
     public Interpreter() { }
 
-    public void Interpret(ASTNode node)
+    public object Interpret(ASTNode node)
     {
+        object returnedVal;
         switch (node.Type)
         {
             case NodeType.Program:
             case NodeType.Block:
                 foreach (var child in node.Children)
                 {
-                    Interpret(child);
+                    object value = Interpret(child);
+                    if (value != null)
+                        return value;
                 }
                 break;
             case NodeType.VariableDeclaration:
                 if (variables.ContainsKey(node.Value))
                     throw new InvalidOperationException($"The variable '{node.Value}' is already defined");
 
-                variables[node.Value] = InterpretExpression(node.Children.First()); ;
+                returnedVal = InterpretExpression(node.Children.First());
+                variables[node.Value] = returnedVal;
                 break;
             case NodeType.Assignment:
                 if (!variables.ContainsKey(node.Value))
                     throw new InvalidOperationException($"The variable '{node.Value}' does not exist in the current context");
 
-                variables[node.Value] = InterpretExpression(node.Children.First()); ;
+                returnedVal = InterpretExpression(node.Children.First());
+                variables[node.Value] = returnedVal;
                 break;
             case NodeType.FunctionDeclaration:
                 InterpretFunction(node);
@@ -39,12 +45,13 @@ public class Interpreter
                 ExecuteFunction(node);
                 break;
             case NodeType.ReturnStatement:
-                variables[node.Value] = InterpretReturn(node);
-                break;
+                object returnValue = InterpretExpression(node.Children.First());
+                return returnValue;
             default:
                 throw new InvalidOperationException($"Unhandled node type: {node.Type}");
         }
 
+        return null;
     }
 
     public void PrintVariables()
@@ -87,31 +94,28 @@ public class Interpreter
             scopedVariables[function.Parameters[i]] = arguments[i];
         }
 
-        ExecuteBlock(function.Body, scopedVariables);
-
-        return null;
+        object value = ExecuteBlock(function.Body, scopedVariables);
+        return value;
     }
 
     // Interpret the block node with the scopeVariables provided
     // After execution, the variables defined in this block are removed, however
     // updates to existing variables are kept
-    private void ExecuteBlock(ASTNode node, Dictionary<string, object> scopeVariables)
+    private object ExecuteBlock(ASTNode node, Dictionary<string, object> scopeVariables)
     {
         var previousVariables = new Dictionary<string, object>(variables);
         variables = scopeVariables;
 
-        Interpret(node);
+        object returnVal = Interpret(node);
 
         // Restore previous variable scope after function execution
         // Only the values for variables defined before the block are kept
         var mergedDict = previousVariables.Keys.ToDictionary(k => k, k => variables.ContainsKey(k) ? variables[k] : previousVariables[k]);
         variables = mergedDict;
+
+        return returnVal;
     }
 
-    private object InterpretReturn(ASTNode node)
-    {
-        return InterpretExpression(node.Children.First());
-    }
 
 
     private object InterpretExpression(ASTNode node)
