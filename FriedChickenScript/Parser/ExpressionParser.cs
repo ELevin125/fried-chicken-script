@@ -5,9 +5,11 @@ public static class ExpressionParser
     public static ASTNode ParseExpression(Parser p)
     {
         ASTNode parsed = ParsePrimary(p);
+        parsed = ParseLogicalAndOr(p, parsed);
         parsed = ParseMultDiv(p, parsed);
         parsed = ParseAddSub(p, parsed);
         parsed = ParseComparison(p, parsed);
+        //parsed = ParseLogicalAndOr(p, parsed);
         return parsed;
     }
 
@@ -103,10 +105,10 @@ public static class ExpressionParser
     {
         ASTNode node = current;
 
-        while (p.GetCurrentToken()?.Type == TokenType.Operator &&
-               (p.GetCurrentToken()?.Value == Syntax.LessThan || p.GetCurrentToken()?.Value == Syntax.GreaterThan ||
-                p.GetCurrentToken()?.Value == "<=" || p.GetCurrentToken()?.Value == ">=" ||
-                p.GetCurrentToken()?.Value == "==" || p.GetCurrentToken()?.Value == "!="))
+        while (p.GetCurrentToken()?.Type == TokenType.Operator
+           && (p.GetCurrentToken()?.Value == Syntax.LessThan || p.GetCurrentToken()?.Value == Syntax.GreaterThan ||
+               p.GetCurrentToken()?.Value == "<=" || p.GetCurrentToken()?.Value == ">=" ||
+               p.GetCurrentToken()?.Value == "==" || p.GetCurrentToken()?.Value == "!="))
         {
             Token operatorToken = p.Consume(TokenType.Operator);
             ASTNode right = ExpressionParser.ParsePrimary(p);
@@ -114,6 +116,24 @@ public static class ExpressionParser
             comparisonExpression.AddChild(node);
             comparisonExpression.AddChild(right);
             node = comparisonExpression;
+        }
+
+        return node;
+    }
+
+    private static ASTNode ParseLogicalAndOr(Parser p, ASTNode current)
+    {
+        ASTNode node = current;
+
+        while (p.GetCurrentToken()?.Type == TokenType.Operator
+           && (p.GetCurrentToken()?.Value == Syntax.And) || p.GetCurrentToken()?.Value == Syntax.Or)
+        {
+            Token operatorToken = p.Consume(TokenType.Operator, p.GetCurrentToken().Value);
+            ASTNode right = ExpressionParser.ParsePrimary(p);
+            ASTNode binaryExpression = new ASTNode(NodeType.BinaryExpression, operatorToken.Value);
+            binaryExpression.AddChild(node);
+            binaryExpression.AddChild(right);
+            node = binaryExpression;
         }
 
         return node;

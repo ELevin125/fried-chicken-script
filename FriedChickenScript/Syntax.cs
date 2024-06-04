@@ -25,12 +25,16 @@ public static class Syntax
     public const string Multiplication = "*";
     public const string Division = "/";
 
-    // Other elements
-    public const string Assignment = "=";
+    // Logic Operators
+    public const string And = "&&";
+    public const string Or = "||";
     public const string Equality = "==";
     public const string Inequality = "!=";
     public const string LessThan = "<";
     public const string GreaterThan = ">";
     public const string EqLessThan = "<=";
     public const string EqGreaterThan = ">=";
+
+    // Other Elements
+    public const string Assignment = "=";
 }

@@ -208,6 +208,10 @@ public class Interpreter
                         return (int)left / (int)right;
 
                     // Logic
+                    case Syntax.And:
+                        return (bool)InterpretExpression(node.Children[0]) == true && (bool)InterpretExpression(node.Children[1]) == true;
+                    case Syntax.Or:
+                        return (bool)InterpretExpression(node.Children[0]) == true || (bool)InterpretExpression(node.Children[1]) == true;
                     case Syntax.Equality:
                         return left?.ToString() == right?.ToString();
                     case Syntax.Inequality:

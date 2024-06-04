@@ -18,6 +18,8 @@ public static class TokenPatterns
         { $@"\b{Syntax.Null}\b", TokenType.ConstLiteral },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
         { @",", TokenType.Delimiter },
+        { @"&&", TokenType.Operator },
+        { @"\|\|", TokenType.Operator },
         { @"==", TokenType.Operator },
         { @"!=", TokenType.Operator },
         { @">=", TokenType.Operator },
