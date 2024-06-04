@@ -59,6 +59,10 @@ public class Interpreter
                 returnedVal = InterpretIfStatement(node);
                 return returnedVal;
 
+            case NodeType.WhileStatement:
+                returnedVal = InterpretWhileStatement(node);
+                return returnedVal;
+
             default:
                 throw new InvalidOperationException($"Unhandled node type: {node.Type}");
         }
@@ -84,11 +88,28 @@ public class Interpreter
             var value = ExecuteBlock(ifBody, variables);
             return value;
         }
-        else if (node.Children.Count > 1)
+        else if (node.Children.Count > 2)
         {
             var elseBody = node.Children[2];
             var value = ExecuteBlock(elseBody, variables);
             return value;
+        }
+        return null;
+    }
+    
+    private object InterpretWhileStatement(ASTNode node)
+    {
+
+        bool condition = (bool)InterpretExpression(node.Children[0]);
+        if (condition)
+        {
+            var body = node.Children[1];
+            var value = ExecuteBlock(body, variables);
+
+            if (value != null)
+                return value;
+            else
+                return InterpretWhileStatement(node);
         }
         return null;
     }
@@ -98,7 +119,6 @@ public class Interpreter
         string functionName = node.Value;
         var parameters = node.Children.Where(c => c.Type == NodeType.Parameter).Select(p => p.Value).ToList();
         var body = node.Children.First(c => c.Type == NodeType.Block);
-
         Function f = new Function(functionName, parameters, body);
         functions[functionName] = f;
     }
