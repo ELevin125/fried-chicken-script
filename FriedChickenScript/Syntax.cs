@@ -13,6 +13,12 @@ public static class Syntax
     public const string While = "fryWhile";
     public const string Print = "print";
 
+    // Constants
+    public const string True = "COOKED";
+    public const string False = "RAW";
+    public const string Null = "EMPTY";
+
+
     // Operators
     public const string Addition = "+";
     public const string Subtraction = "-";

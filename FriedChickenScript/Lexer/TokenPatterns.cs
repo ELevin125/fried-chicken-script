@@ -13,6 +13,9 @@ public static class TokenPatterns
         { $@"\b{Syntax.Else}\b", TokenType.Keyword },
         { $@"\b{Syntax.While}\b", TokenType.Keyword },
         { $@"\b{Syntax.Print}\b", TokenType.Keyword },
+        { $@"\b{Syntax.True}\b", TokenType.ConstLiteral },
+        { $@"\b{Syntax.False}\b", TokenType.ConstLiteral },
+        { $@"\b{Syntax.Null}\b", TokenType.ConstLiteral },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
         { @",", TokenType.Delimiter },
         { @"==", TokenType.Operator },

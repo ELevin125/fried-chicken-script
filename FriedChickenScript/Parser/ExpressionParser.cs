@@ -20,6 +20,12 @@ public static class ExpressionParser
             p.Consume(TokenType.Literal);
             return new ASTNode(NodeType.Literal, currentToken.Value);
         }
+        else if (currentToken.Type == TokenType.ConstLiteral)
+        {
+            p.Consume(TokenType.ConstLiteral);
+            string value = ExpressionParser.GetConstLiteralVal(currentToken.Value);
+            return new ASTNode(NodeType.Literal, value);
+        }
         else if (currentToken.Type == TokenType.Identifier)
         {
             Token identifierToken = p.Consume(TokenType.Identifier);
@@ -39,6 +45,21 @@ public static class ExpressionParser
         else
         {
             throw new Exception("Unexpected token: " + currentToken.Type);
+        }
+    }
+
+    private static string GetConstLiteralVal(string value)
+    {
+        switch (value)
+        {
+            case Syntax.True: 
+                return "true";
+            
+            case Syntax.False: 
+                return "false";
+            
+            default: 
+                return null;
         }
     }
 

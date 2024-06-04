@@ -178,6 +178,10 @@ public class Interpreter
                 {
                     return intValue;
                 }
+                else if (bool.TryParse(node.Value, out bool boolValue))
+                {
+                    return boolValue;
+                }
                 return node.Value;
 
             case NodeType.Identifier:
@@ -205,9 +209,9 @@ public class Interpreter
 
                     // Logic
                     case Syntax.Equality:
-                        return (int)left == (int)right;
+                        return left?.ToString() == right?.ToString();
                     case Syntax.Inequality:
-                        return (int)left != (int)right;
+                        return left?.ToString() != right?.ToString();
                     case Syntax.LessThan:
                         return (int)left < (int)right;
                     case Syntax.GreaterThan:

@@ -6,6 +6,7 @@ public enum TokenType
     Identifier,
     Operator,
     Literal,
+    ConstLiteral,
     Delimiter,
     LeftParen,
     RightParen,
