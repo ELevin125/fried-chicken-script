@@ -1,4 +1,6 @@
-﻿namespace FriedChickenScript;
+﻿using System.Xml.Linq;
+
+namespace FriedChickenScript;
 
 public static class ExpressionParser
 {
@@ -9,7 +11,6 @@ public static class ExpressionParser
         parsed = ParseMultDiv(p, parsed);
         parsed = ParseAddSub(p, parsed);
         parsed = ParseComparison(p, parsed);
-        //parsed = ParseLogicalAndOr(p, parsed);
         return parsed;
     }
 
@@ -35,7 +36,18 @@ public static class ExpressionParser
             {
                 return FunctionParser.ParseFunctionCall(p, identifierToken);
             }
+            else if (p.GetCurrentToken()?.Type == TokenType.Operator && p.GetCurrentToken()?.Value == Syntax.Dot)
+            {
+                return ExpressionParser.ParseDot(p, new ASTNode(NodeType.ObjIdentifier, identifierToken.Value));
+            }
             return new ASTNode(NodeType.Identifier, identifierToken.Value);
+        }
+        else if (currentToken.Type == TokenType.LeftBrace)
+        {
+            p.Consume(TokenType.LeftBrace, "{");
+            ASTNode expression = ExpressionParser.ParseExpression(p);
+            p.Consume(TokenType.RightBrace, "}");
+            return expression;
         }
         else if (currentToken.Type == TokenType.LeftParen)
         {
@@ -64,6 +76,18 @@ public static class ExpressionParser
                 return null;
         }
     }
+    private static ASTNode ParseDot(Parser p, ASTNode current)
+    {
+        ASTNode node = current;
+
+        while (p.GetCurrentToken()?.Type == TokenType.Operator && p.GetCurrentToken()?.Value == Syntax.Dot)
+        {
+            p.Consume(TokenType.Operator, p.GetCurrentToken().Value);
+            node.AddChild(ExpressionParser.ParseExpression(p));
+        }
+        return node;
+    }
+
 
     private static ASTNode ParseAddSub(Parser p, ASTNode current)
     {

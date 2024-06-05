@@ -13,6 +13,8 @@ public enum NodeType
     Assignment,
     FunctionCall,
     PrintStatement,
+    ObjDeclaration,
+    ObjIdentifier,
     Identifier,
     Literal,
     IfStatement,

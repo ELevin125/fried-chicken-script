@@ -13,6 +13,24 @@ public static class MiscParser
 
         return blockNode;
     }
+    
+    public static ASTNode ParseObject(Parser p)
+    {
+        p.Consume(TokenType.Keyword, Syntax.Object);
+
+        Token name = p.Consume(TokenType.Identifier);
+
+        ASTNode objNode = new ASTNode(NodeType.ObjDeclaration, name.Value);
+        p.Consume(TokenType.Operator, Syntax.Assignment);
+        p.Consume(TokenType.LeftBrace);
+
+        while (p.GetCurrentToken().Type != TokenType.RightBrace && p.TokenIndex < p.tokens.Count)
+        {
+            objNode.AddChild(p.ParseStatement());
+        }
+        p.Consume(TokenType.RightBrace);
+        return objNode;
+    }
 
     public static ASTNode ParseIfStatement(Parser p)
     {

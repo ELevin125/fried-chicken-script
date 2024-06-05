@@ -30,6 +30,8 @@ public class Parser
         {
             case Syntax.Variable:
                 return VariableParser.ParseDeclaration(this);
+            case Syntax.Object:
+                return MiscParser.ParseObject(this);
             case Syntax.Function:
                 return FunctionParser.ParseDeclaration(this);
             case Syntax.Return:

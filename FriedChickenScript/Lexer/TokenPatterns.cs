@@ -1,4 +1,6 @@
-﻿namespace FriedChickenScript;
+﻿using System.Text.RegularExpressions;
+
+namespace FriedChickenScript;
 
 public static class TokenPatterns
 {
@@ -6,6 +8,7 @@ public static class TokenPatterns
         { @"\/\/.*", TokenType.Comment },
         { @"\/\*[\s\S]*?\*\/", TokenType.Comment },
         { $@"\b{Syntax.Variable}\b", TokenType.Keyword },
+        { $@"\b{Syntax.Object}\b", TokenType.Keyword },
         { $@"\b{Syntax.Function}\b", TokenType.Keyword },
         { $@"{Syntax.Parameter}", TokenType.Keyword },
         { $@"\b{Syntax.Return}\b", TokenType.Keyword },
@@ -18,8 +21,9 @@ public static class TokenPatterns
         { $@"\b{Syntax.Null}\b", TokenType.ConstLiteral },
         { @"[a-zA-Z_][a-zA-Z0-9_]*", TokenType.Identifier }, // variable / func name
         { @",", TokenType.Delimiter },
-        { @"&&", TokenType.Operator },
-        { @"\|\|", TokenType.Operator },
+        { $@"{Regex.Escape(Syntax.And)}", TokenType.Operator },
+        { $@"{Regex.Escape(Syntax.Or)}", TokenType.Operator },
+        { $@"{Regex.Escape(Syntax.Dot)}", TokenType.Operator },
         { @"==", TokenType.Operator },
         { @"!=", TokenType.Operator },
         { @">=", TokenType.Operator },
@@ -32,7 +36,9 @@ public static class TokenPatterns
         { @"\/", TokenType.Operator },
         { @"\*", TokenType.Operator },
         { @"[0-9]+", TokenType.Literal }, // number
-        { @"""[^""]*""", TokenType.Literal }, // string ""
+        //{ @"""[^""]*""", TokenType.Literal }, // string ""
+        { "\"([^\"]*)\"", TokenType.Literal },
+
         { @"\(", TokenType.LeftParen },
         { @"\)", TokenType.RightParen },
         { @"\{", TokenType.LeftBrace },

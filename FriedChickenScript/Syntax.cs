@@ -6,7 +6,7 @@ public static class Syntax
     public const string Variable = "ingredient";
     public const string Function = "recipe";
     public const string Parameter = "withExtra:";
-    public const string Struct = "bucket";
+    public const string Object = "bucket";
     public const string Return = "serve";
     public const string If = "if";
     public const string Else = "else";
@@ -37,4 +37,5 @@ public static class Syntax
 
     // Other Elements
     public const string Assignment = "=";
+    public const string Dot = ".";
 }

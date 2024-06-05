@@ -6,6 +6,7 @@ namespace FriedChickenScript;
 public class Interpreter
 {
     private Dictionary<string, object> variables = new Dictionary<string, object>();
+    private Dictionary<string, Object> objects = new Dictionary<string, Object>();
     private Dictionary<string, Function> functions = new Dictionary<string, Function>();
 
     public Interpreter() { }
@@ -39,6 +40,22 @@ public class Interpreter
 
                 returnedVal = InterpretExpression(node.Children.First());
                 variables[node.Value] = returnedVal;
+                break;
+
+            case NodeType.ObjDeclaration:
+                if (variables.ContainsKey(node.Value))
+                    throw new InvalidOperationException($"The object '{node.Value}' is already defined");
+
+                Interpreter tempInterpret = new Interpreter();
+                //tempInterpret.Interpret(node.Children);
+                Dictionary<string, object> props = new Dictionary<string, object>();
+                foreach (var child in node.Children)
+                {
+                    props[child.Value] = tempInterpret.Interpret(child);
+                }
+
+                returnedVal = new Object(tempInterpret.variables, tempInterpret.functions);
+                objects[node.Value] = (Object)returnedVal;
                 break;
 
             case NodeType.FunctionDeclaration:
@@ -169,8 +186,17 @@ public class Interpreter
 
 
 
-    private object InterpretExpression(ASTNode node)
+    private object InterpretExpression(ASTNode node, Dictionary<string, object> scopedVariables = null, Dictionary<string, Function> scopedFunctions = null)
     {
+        Dictionary<string, object> previousVariables = variables;
+        if (scopedVariables != null)
+            variables = variables.Union(scopedVariables)
+                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        Dictionary<string, Function> previousFunctions = functions;
+        if (scopedFunctions != null)
+            functions = functions.Union(scopedFunctions)
+                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value); ;
+
         switch (node.Type)
         {
             case NodeType.Literal:
@@ -186,6 +212,11 @@ public class Interpreter
 
             case NodeType.Identifier:
                 return variables[node.Value];
+
+            case NodeType.ObjIdentifier:
+                Object temp = objects[node.Value];
+                object retVal = InterpretExpression(node.Children.First(), temp.Properties, temp.Methods);
+                return retVal;
             
             case NodeType.FunctionCall:
                 return ExecuteFunction(node);
@@ -199,7 +230,17 @@ public class Interpreter
                 {
                     // Math
                     case Syntax.Addition:
-                        return (int)left + (int)right;
+                        bool leftIsNum = int.TryParse(left.ToString(), out int leftNum);
+                        bool rightIsNum = int.TryParse(right.ToString(), out int rightNum);
+
+                        if (leftIsNum && rightIsNum)
+                        {
+                            return leftNum + rightNum;
+                        }
+                        else
+                        {
+                            return left.ToString() + right.ToString();
+                        }
                     case Syntax.Subtraction:
                         return (int)left - (int)right;
                     case Syntax.Multiplication:
@@ -228,6 +269,9 @@ public class Interpreter
                         throw new InvalidOperationException($"Unrecognized operator: {operatorType}");
                 }
         }
+
+        variables = previousVariables;
+        functions = scopedFunctions;
 
         return null;
     }
