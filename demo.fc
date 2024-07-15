@@ -1,3 +1,6 @@
+// The design that the language will look like
+// NOTE - this code is not executable yet
+
 // var		|	ingredient
 // const	|	secretSpice
 // struct	|	bucket
