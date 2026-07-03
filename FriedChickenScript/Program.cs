@@ -9,8 +9,9 @@ class Program
 
         if (path == null)
         {
-            Console.Error.WriteLine("Usage: FriedChickenScript [--debug] <script.fc>");
-            return 1;
+            // No script given: drop into the interactive shell.
+            new Repl().Run();
+            return 0;
         }
 
         string script = File.ReadAllText(path);

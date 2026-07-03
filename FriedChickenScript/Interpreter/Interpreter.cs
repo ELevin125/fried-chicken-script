@@ -17,8 +17,46 @@ public class Interpreter
 
     public void Run(ASTNode program)
     {
-        // Hoist recipe/bucket declarations first so calls and instantiations can appear
-        // before the definition they refer to.
+        Hoist(program);
+
+        foreach (var child in program.Children)
+        {
+            Execute(child, globals);
+        }
+    }
+
+    // Run one fragment typed at the REPL against the persistent global scope. Statements
+    // execute for their effect; a bare expression is evaluated and its value returned so
+    // the shell can echo it. Returns the last expression value, or null.
+    public object? RunRepl(ASTNode program)
+    {
+        Hoist(program);
+
+        object? last = null;
+        foreach (var child in program.Children)
+        {
+            if (IsExpression(child))
+            {
+                last = Evaluate(child, globals);
+            }
+            else
+            {
+                Execute(child, globals);
+                last = null;
+            }
+        }
+        return last;
+    }
+
+    // Names currently defined in the session (for the REPL's .vars command).
+    public IReadOnlyCollection<string> DefinedVariables => globals.Names();
+    public IReadOnlyCollection<string> DefinedRecipes => functions.Keys.ToList();
+    public IReadOnlyCollection<string> DefinedBuckets => types.Keys.ToList();
+
+    // Register recipe/bucket declarations first so calls and instantiations can appear
+    // before the definition they refer to.
+    private void Hoist(ASTNode program)
+    {
         foreach (var child in program.Children)
         {
             if (child.Type == NodeType.FunctionDeclaration)
@@ -30,10 +68,23 @@ public class Interpreter
                 RegisterType(child);
             }
         }
+    }
 
-        foreach (var child in program.Children)
+    private static bool IsExpression(ASTNode node)
+    {
+        switch (node.Type)
         {
-            Execute(child, globals);
+            case NodeType.NumberLiteral:
+            case NodeType.StringLiteral:
+            case NodeType.BooleanLiteral:
+            case NodeType.NullLiteral:
+            case NodeType.Identifier:
+            case NodeType.MemberAccess:
+            case NodeType.FunctionCall:
+            case NodeType.BinaryExpression:
+                return true;
+            default:
+                return false;
         }
     }
 

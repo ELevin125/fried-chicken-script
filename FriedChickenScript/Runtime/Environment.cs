@@ -50,4 +50,7 @@ public class Environment
     }
 
     public bool ExistsLocally(string name) => values.ContainsKey(name);
+
+    // Names bound directly in this scope (used by the REPL's .vars command).
+    public IReadOnlyCollection<string> Names() => values.Keys.ToList();
 }

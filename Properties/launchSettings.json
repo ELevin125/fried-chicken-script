@@ -1,8 +1,7 @@
 {
   "profiles": {
     "FriedChickenScript": {
-      "commandName": "Project",
-      "commandLineArgs": "examples/vars.fc"
+      "commandName": "Project"
     }
   }
 }
