@@ -1,60 +1,84 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "FriedChicken Script",
-	"patterns": [
-
-        {
-            "include": "#keywords"
-        },
-        {
-            "include": "#function_calls"
-        },
-        {
-            "include": "#structs"
-        }
-    ],
-    "repository": {
-        "keywords": {
-            "patterns": [
-                {
-                    "name": "keyword.control",
-                    "match": "\\b(withExtra|serve|if|else|fryWhile|COOKED|RAW|EMPTY)\\b"
-                },
-                {
-                    "name": "storage.type",
-                    "match": "\\b(ingredient|secretSpice|recipe)\\b"
-                },
-                {
-                    "name": "keyword.operator",
-                    "match": "\\+|-|\\*|/|%|\\^|>|<|==|!=|>=|<=|&&|\\|\\||\\?|:|\\[|\\]|\\{|\\}|\\(|\\)|;|,|=|\\."
-                }
-            ]
-        },
-
-        "escape_chars": {
-            "patterns": [
-                {
-                    "name": "constant.character.escape",
-                    "match": "\\\\."
-                }
-            ]
-        },
-        "function_calls": {
-            "patterns": [
-                {
-                    "name": "entity.name.function",
-                    "match": "\\b\\w+\\s*\\("
-                }
-            ]
-        },
-        "structs": {
-            "patterns": [
-                {
-                    "name": "entity.name.class",
-                    "match": "\\b(bucket)\\b"
-                }
-            ]
-        }
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "FriedChicken Script",
+  "scopeName": "source.fc",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#constants" },
+    { "include": "#declarations" },
+    { "include": "#keywords" },
+    { "include": "#function_calls" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.fc", "match": "//.*$" },
+        { "name": "comment.block.fc", "begin": "/\\*", "end": "\\*/" }
+      ]
     },
-	"scopeName": "source.fc"
+    "strings": {
+      "name": "string.quoted.double.fc",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.fc", "match": "\\\\." }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.fc", "match": "\\b[0-9]+\\b" }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        { "name": "constant.language.fc", "match": "\\b(COOKED|RAW|EMPTY)\\b" }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "match": "\\b(bucket)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "storage.type.fc" },
+            "2": { "name": "entity.name.type.fc" }
+          }
+        },
+        {
+          "match": "\\b(recipe)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "storage.type.fc" },
+            "2": { "name": "entity.name.function.fc" }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.fc",
+          "match": "\\b(if|else|fryWhile|serve|print|withExtra)\\b"
+        },
+        {
+          "name": "storage.type.fc",
+          "match": "\\b(ingredient|recipe|bucket|secretSpice)\\b"
+        }
+      ]
+    },
+    "function_calls": {
+      "patterns": [
+        {
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()",
+          "captures": { "1": { "name": "entity.name.function.fc" } }
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.fc", "match": "==|!=|>=|<=|&&|\\|\\||[-+*/<>=.]" }
+      ]
+    }
+  }
 }

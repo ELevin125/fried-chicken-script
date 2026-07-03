@@ -1,8 +1,9 @@
 {
   "name": "fcs",
-  "displayName": "FCS",
-  "description": "FCS Scripting Language",
+  "displayName": "FriedChicken Script",
+  "description": "Syntax highlighting for FriedChicken Script (.fc)",
   "version": "0.0.1",
+  "publisher": "local",
   "engines": {
     "vscode": "^1.89.0"
   },
