@@ -1,279 +1,201 @@
-﻿using System.Diagnostics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace FriedChickenScript;
 
+// Tree-walking interpreter. Executes statements against an Environment (scope chain);
+// expression values are produced by ExpressionEvaluator. Return values propagate via
+// ReturnException, so a `serve` deep inside nested blocks unwinds straight to the call.
 public class Interpreter
 {
-    private Dictionary<string, object> variables = new Dictionary<string, object>();
-    private Dictionary<string, Object> objects = new Dictionary<string, Object>();
-    private Dictionary<string, Function> functions = new Dictionary<string, Function>();
+    private readonly Environment globals = new();
+    private readonly Dictionary<string, Function> functions = new();
+    private readonly Dictionary<string, TypeDefinition> types = new();
+    private readonly ExpressionEvaluator evaluator;
 
-    public Interpreter() { }
-
-    public object Interpret(ASTNode node)
+    public Interpreter()
     {
-        object returnedVal;
+        evaluator = new ExpressionEvaluator(this);
+    }
+
+    public void Run(ASTNode program)
+    {
+        // Hoist recipe/bucket declarations first so calls and instantiations can appear
+        // before the definition they refer to.
+        foreach (var child in program.Children)
+        {
+            if (child.Type == NodeType.FunctionDeclaration)
+            {
+                RegisterFunction(child);
+            }
+            else if (child.Type == NodeType.BucketDeclaration)
+            {
+                RegisterType(child);
+            }
+        }
+
+        foreach (var child in program.Children)
+        {
+            Execute(child, globals);
+        }
+    }
+
+    public void Execute(ASTNode node, Environment env)
+    {
         switch (node.Type)
         {
             case NodeType.Program:
-            case NodeType.Block:
                 foreach (var child in node.Children)
                 {
-                    object value = Interpret(child);
-                    if (value != null)
-                        return value;
+                    Execute(child, env);
+                }
+                break;
+
+            case NodeType.Block:
+                Environment blockScope = new Environment(env);
+                foreach (var child in node.Children)
+                {
+                    Execute(child, blockScope);
                 }
                 break;
 
             case NodeType.VariableDeclaration:
-                if (variables.ContainsKey(node.Value))
-                    throw new InvalidOperationException($"The variable '{node.Value}' is already defined");
-
-                returnedVal = InterpretExpression(node.Children.First());
-                variables[node.Value] = returnedVal;
+                if (env.ExistsLocally(node.Value!))
+                    throw new FcRuntimeException($"'{node.Value}' is already defined in this scope");
+                env.Define(node.Value!, Evaluate(node.Children[0], env));
                 break;
 
             case NodeType.Assignment:
-                if (!variables.ContainsKey(node.Value))
-                    throw new InvalidOperationException($"The variable '{node.Value}' does not exist in the current context");
-
-                returnedVal = InterpretExpression(node.Children.First());
-                variables[node.Value] = returnedVal;
+                env.Assign(node.Value!, Evaluate(node.Children[0], env));
                 break;
 
-            case NodeType.ObjDeclaration:
-                if (variables.ContainsKey(node.Value))
-                    throw new InvalidOperationException($"The object '{node.Value}' is already defined");
-
-                Interpreter tempInterpret = new Interpreter();
-                //tempInterpret.Interpret(node.Children);
-                Dictionary<string, object> props = new Dictionary<string, object>();
-                foreach (var child in node.Children)
-                {
-                    props[child.Value] = tempInterpret.Interpret(child);
-                }
-
-                returnedVal = new Object(tempInterpret.variables, tempInterpret.functions);
-                objects[node.Value] = (Object)returnedVal;
+            case NodeType.MemberAssignment:
+                ExecuteMemberAssignment(node, env);
                 break;
 
             case NodeType.FunctionDeclaration:
-                InterpretFunction(node);
+                RegisterFunction(node);
+                break;
+
+            case NodeType.BucketDeclaration:
+                RegisterType(node);
+                break;
+
+            case NodeType.ObjectInstantiation:
+                ExecuteInstantiation(node, env);
                 break;
 
             case NodeType.FunctionCall:
-                // This function call does not trigger when assigning a value to a variable
-                // only when called standalone 
-                ExecuteFunction(node);
+                Evaluate(node, env); // called for its effect; return value discarded
                 break;
 
             case NodeType.ReturnStatement:
-                returnedVal = InterpretExpression(node.Children.First());
-                return returnedVal;
+                throw new ReturnException(Evaluate(node.Children[0], env));
+
+            case NodeType.PrintStatement:
+                Console.WriteLine(ValueOps.Stringify(Evaluate(node.Children[0], env)));
+                break;
 
             case NodeType.IfStatement:
-                returnedVal = InterpretIfStatement(node);
-                return returnedVal;
+                if (ValueOps.Truthy(Evaluate(node.Children[0], env)))
+                    Execute(node.Children[1], env);
+                else if (node.Children.Count > 2)
+                    Execute(node.Children[2], env);
+                break;
 
             case NodeType.WhileStatement:
-                returnedVal = InterpretWhileStatement(node);
-                return returnedVal;
+                while (ValueOps.Truthy(Evaluate(node.Children[0], env)))
+                {
+                    Execute(node.Children[1], env);
+                }
+                break;
 
             default:
-                throw new InvalidOperationException($"Unhandled node type: {node.Type}");
-        }
-
-        return null;
-    }
-
-    public void PrintVariables()
-    {
-        foreach (var kvp in variables)
-        {
-            Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+                throw new FcRuntimeException($"Unhandled statement: {node.Type}");
         }
     }
 
-    private object InterpretIfStatement(ASTNode node)
+    public object? Evaluate(ASTNode node, Environment env) => evaluator.Evaluate(node, env);
+
+    // Called from ExpressionEvaluator for both statement and expression calls.
+    public object? CallFunction(string name, List<object?> args)
     {
+        if (!functions.TryGetValue(name, out var function))
+            throw new FcRuntimeException($"Recipe '{name}' is not defined");
+        if (function.Parameters.Count != args.Count)
+            throw new FcRuntimeException(
+                $"Recipe '{name}' expects {function.Parameters.Count} argument(s) but got {args.Count}");
 
-        bool condition = (bool)InterpretExpression(node.Children[0]);
-        if (condition)
-        {
-            var ifBody = node.Children[1];
-            var value = ExecuteBlock(ifBody, variables);
-            return value;
-        }
-        else if (node.Children.Count > 2)
-        {
-            var elseBody = node.Children[2];
-            var value = ExecuteBlock(elseBody, variables);
-            return value;
-        }
-        return null;
-    }
-    
-    private object InterpretWhileStatement(ASTNode node)
-    {
-
-        bool condition = (bool)InterpretExpression(node.Children[0]);
-        if (condition)
-        {
-            var body = node.Children[1];
-            var value = ExecuteBlock(body, variables);
-
-            if (value != null)
-                return value;
-            else
-                return InterpretWhileStatement(node);
-        }
-        return null;
-    }
-
-    private void InterpretFunction(ASTNode node)
-    {
-        string functionName = node.Value;
-        var parameters = node.Children.Where(c => c.Type == NodeType.Parameter).Select(p => p.Value).ToList();
-        var body = node.Children.First(c => c.Type == NodeType.Block);
-        Function f = new Function(functionName, parameters, body);
-        functions[functionName] = f;
-    }
-
-    private object ExecuteFunction(ASTNode node)
-    {
-        string functionName = node.Value;
-        if (!functions.ContainsKey(functionName))
-            throw new InvalidOperationException($"Function '{functionName}' is not defined");
-
-        Function function = functions[functionName];
-        List<object> arguments = node.Children
-            .Where(c => c.Type == NodeType.Arguments)
-            .SelectMany(argNode => argNode.Children.Select(arg => InterpretExpression(arg))) // Interpret all arguments
-            .ToList();
-
-        if (function.Parameters.Count != arguments.Count)
-            throw new InvalidOperationException($"Function '{functionName}' expects {function.Parameters.Count} arguments, but {arguments.Count} were provided");
-
-        // Create a new scope for the function body that will include the parameters as variables
-        var scopedVariables = new Dictionary<string, object>(variables);
+        // Functions are top-level, so they close over globals (not the caller's locals).
+        Environment callEnv = new Environment(globals);
         for (int i = 0; i < function.Parameters.Count; i++)
         {
-            scopedVariables[function.Parameters[i]] = arguments[i];
+            callEnv.Define(function.Parameters[i], args[i]);
         }
 
-        object value = ExecuteBlock(function.Body, scopedVariables);
-        return value;
-    }
-
-    // Interpret the block node with the scopeVariables provided
-    // After execution, the variables defined in this block are removed, however
-    // updates to existing variables are kept
-    private object ExecuteBlock(ASTNode node, Dictionary<string, object> scopeVariables)
-    {
-        var previousVariables = new Dictionary<string, object>(variables);
-        variables = scopeVariables;
-
-        object returnVal = Interpret(node);
-
-        // Restore previous variable scope after function execution
-        // Only the values for variables defined before the block are kept
-        var mergedDict = previousVariables.Keys.ToDictionary(k => k, k => variables.ContainsKey(k) ? variables[k] : previousVariables[k]);
-        variables = mergedDict;
-
-        return returnVal;
-    }
-
-
-
-    private object InterpretExpression(ASTNode node, Dictionary<string, object> scopedVariables = null, Dictionary<string, Function> scopedFunctions = null)
-    {
-        Dictionary<string, object> previousVariables = variables;
-        if (scopedVariables != null)
-            variables = variables.Union(scopedVariables)
-                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        Dictionary<string, Function> previousFunctions = functions;
-        if (scopedFunctions != null)
-            functions = functions.Union(scopedFunctions)
-                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value); ;
-
-        switch (node.Type)
+        try
         {
-            case NodeType.Literal:
-                if (int.TryParse(node.Value, out int intValue))
-                {
-                    return intValue;
-                }
-                else if (bool.TryParse(node.Value, out bool boolValue))
-                {
-                    return boolValue;
-                }
-                return node.Value;
-
-            case NodeType.Identifier:
-                return variables[node.Value];
-
-            case NodeType.ObjIdentifier:
-                Object temp = objects[node.Value];
-                object retVal = InterpretExpression(node.Children.First(), temp.Properties, temp.Methods);
-                return retVal;
-            
-            case NodeType.FunctionCall:
-                return ExecuteFunction(node);
-
-            case NodeType.BinaryExpression:
-                var left = InterpretExpression(node.Children[0]);
-                var right = InterpretExpression(node.Children[1]);
-                string operatorType = node.Value;
-
-                switch (operatorType)
-                {
-                    // Math
-                    case Syntax.Addition:
-                        bool leftIsNum = int.TryParse(left.ToString(), out int leftNum);
-                        bool rightIsNum = int.TryParse(right.ToString(), out int rightNum);
-
-                        if (leftIsNum && rightIsNum)
-                        {
-                            return leftNum + rightNum;
-                        }
-                        else
-                        {
-                            return left.ToString() + right.ToString();
-                        }
-                    case Syntax.Subtraction:
-                        return (int)left - (int)right;
-                    case Syntax.Multiplication:
-                        return (int)left * (int)right;
-                    case Syntax.Division:
-                        return (int)left / (int)right;
-
-                    // Logic
-                    case Syntax.And:
-                        return (bool)InterpretExpression(node.Children[0]) == true && (bool)InterpretExpression(node.Children[1]) == true;
-                    case Syntax.Or:
-                        return (bool)InterpretExpression(node.Children[0]) == true || (bool)InterpretExpression(node.Children[1]) == true;
-                    case Syntax.Equality:
-                        return left?.ToString() == right?.ToString();
-                    case Syntax.Inequality:
-                        return left?.ToString() != right?.ToString();
-                    case Syntax.LessThan:
-                        return (int)left < (int)right;
-                    case Syntax.GreaterThan:
-                        return (int)left > (int)right;
-                    case Syntax.EqLessThan:
-                        return (int)left <= (int)right;
-                    case Syntax.EqGreaterThan:
-                        return (int)left >= (int)right;
-                    default:
-                        throw new InvalidOperationException($"Unrecognized operator: {operatorType}");
-                }
+            Execute(function.Body, callEnv);
         }
-
-        variables = previousVariables;
-        functions = scopedFunctions;
-
+        catch (ReturnException r)
+        {
+            return r.Value;
+        }
         return null;
     }
-}
 
+    private void ExecuteInstantiation(ASTNode node, Environment env)
+    {
+        string typeName = node.Value!;
+        string varName = node.Children[0].Value!;
+
+        if (!types.TryGetValue(typeName, out var type))
+            throw new FcRuntimeException($"Unknown bucket type '{typeName}'");
+
+        object? value;
+        if (node.Children.Count > 1)
+        {
+            value = Evaluate(node.Children[1], env);
+            if (value is not FcObject fo)
+                throw new FcRuntimeException($"Cannot initialise '{varName}' of type {typeName} from a non-object value");
+            if (fo.TypeName != typeName)
+                throw new FcRuntimeException($"Type mismatch: '{varName}' is {typeName} but got {fo.TypeName}");
+        }
+        else
+        {
+            var instance = new FcObject(typeName);
+            foreach (var field in type.Fields)
+            {
+                instance.Fields[field.Name] = field.Default != null ? Evaluate(field.Default, env) : null;
+            }
+            value = instance;
+        }
+
+        env.Define(varName, value);
+    }
+
+    private void ExecuteMemberAssignment(ASTNode node, Environment env)
+    {
+        object? target = Evaluate(node.Children[0], env);
+        if (target is not FcObject obj)
+            throw new FcRuntimeException($"Cannot set field '{node.Value}' on a non-object value");
+        if (!obj.Fields.ContainsKey(node.Value!))
+            throw new FcRuntimeException($"'{obj.TypeName}' has no field '{node.Value}'");
+        obj.Fields[node.Value!] = Evaluate(node.Children[1], env);
+    }
+
+    private void RegisterFunction(ASTNode node)
+    {
+        var parameters = node.Children
+            .Where(c => c.Type == NodeType.Parameter)
+            .Select(c => c.Value!)
+            .ToList();
+        var body = node.Children.First(c => c.Type == NodeType.Block);
+        functions[node.Value!] = new Function(node.Value!, parameters, body);
+    }
+
+    private void RegisterType(ASTNode node)
+    {
+        var fields = node.Children
+            .Select(f => new FieldDefinition(f.Value!, f.Children.Count > 0 ? f.Children[0] : null))
+            .ToList();
+        types[node.Value!] = new TypeDefinition(node.Value!, fields);
+    }
+}

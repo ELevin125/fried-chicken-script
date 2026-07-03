@@ -1,0 +1,15 @@
+// Variables, arithmetic, strings, and constants
+
+ingredient x = 5
+ingredient y = x + 3
+ingredient z = x * y
+print(z)                        // 40
+
+print("Hello " + "chicken")     // Hello chicken
+
+ingredient spicy = COOKED
+print(spicy)                    // COOKED
+
+// Precedence + associativity
+print(2 + 3 * 4)                // 14
+print(10 - 2 - 3)               // 5

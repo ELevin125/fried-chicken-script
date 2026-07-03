@@ -1,57 +1,85 @@
-﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+
 namespace FriedChickenScript;
 
 public class Lexer
 {
-    private string rawProgram;
-    private int matchPos = 0;
+    private readonly string src;
+    private int pos = 0;
+    private int line = 1;
+    private int col = 1;
 
-    public Lexer(string rawProgram)
+    public Lexer(string src)
     {
-        this.rawProgram = rawProgram;
+        this.src = src;
     }
 
     public List<Token> Tokenise()
     {
-        List<Token> tokens = new List<Token>();
-        while (matchPos < rawProgram.Length)
+        var tokens = new List<Token>();
+
+        while (pos < src.Length)
         {
-            if (char.IsWhiteSpace(rawProgram[matchPos]))
+            char c = src[pos];
+            if (c == '\n')
             {
-                matchPos++;
+                pos++;
+                line++;
+                col = 1;
+                continue;
+            }
+            if (char.IsWhiteSpace(c))
+            {
+                pos++;
+                col++;
                 continue;
             }
 
-            Token token = NextToken();
-
-            if (token != null)
-            {
-                if (token.Type != TokenType.Comment)
-                    tokens.Add(token);
-            }
-            else
-            {
-                throw new Exception($"Unexpected character: {rawProgram[matchPos]}");
-            }
+            if (!TryMatch(tokens))
+                throw new FcParseException($"Unexpected character '{c}' at line {line}, column {col}");
         }
 
         return tokens;
     }
 
-    private Token NextToken()
+    // Try each rule in order; the first that matches at the current position wins.
+    private bool TryMatch(List<Token> tokens)
     {
-        foreach (var pattern in TokenPatterns.Patterns)
+        foreach (var (regex, type) in TokenPatterns.Patterns)
         {
-            Regex regex = new Regex($"^{pattern.Key}");
-            Match match = regex.Match(rawProgram.Substring(matchPos));
+            Match m = regex.Match(src, pos);
+            if (!m.Success)
+                continue;
 
-            if (match.Success)
+            if (type != TokenType.Comment)
             {
-                matchPos += match.Length;
-                return new Token(pattern.Value, match.Value);
+                // String literals keep only their inner text (capture group 1).
+                string value = type == TokenType.StringLiteral ? m.Groups[1].Value : m.Value;
+                tokens.Add(new Token(type, value, line, col));
+            }
+
+            Advance(m.Value);
+            return true;
+        }
+        return false;
+    }
+
+    // Move past matched text, keeping line/column accurate even across newlines
+    // (block comments and strings can span lines).
+    private void Advance(string text)
+    {
+        foreach (char ch in text)
+        {
+            if (ch == '\n')
+            {
+                line++;
+                col = 1;
+            }
+            else
+            {
+                col++;
             }
         }
-        return null;
+        pos += text.Length;
     }
 }

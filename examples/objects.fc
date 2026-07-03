@@ -1,0 +1,30 @@
+// Buckets: type definitions, instances, field read/write, objects returned from recipes
+
+bucket Order {
+    ingredient recipeName = "Original"
+    ingredient pieces = 8
+    ingredient isSpicy = RAW
+}
+
+bucket Meal {
+    ingredient content = ""
+    ingredient isSpicy = RAW
+}
+
+recipe cook withExtra: pieces, spicy {
+    Meal m
+    m.content = "chicken x " + pieces
+    m.isSpicy = spicy
+    serve m
+}
+
+Order myOrder
+myOrder.pieces = 12
+myOrder.isSpicy = COOKED
+print(myOrder.recipeName)     // Original
+print(myOrder.pieces)         // 12
+print(myOrder.isSpicy)        // COOKED
+
+Meal dinner = cook(myOrder.pieces, myOrder.isSpicy)
+print(dinner.content)         // chicken x 12
+print(dinner.isSpicy)         // COOKED

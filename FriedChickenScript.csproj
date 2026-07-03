@@ -2,9 +2,15 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- This project sits at the repo root, so its default source glob would otherwise
+         pull in the sibling test project. Keep those files out of the main compile. -->
+    <Compile Remove="FriedChickenScript.Tests/**/*.cs" />
+  </ItemGroup>
 
 </Project>

@@ -1,34 +1,56 @@
-﻿using FriedChickenScript;
+using FriedChickenScript;
 
 class Program
 {
-    static void Main(string[] args)
+    static int Main(string[] args)
     {
-        //string filePath = "testScript.fc";
-        string script = File.ReadAllText(args[0]);
+        bool debug = args.Contains("--debug");
+        string? path = args.FirstOrDefault(a => !a.StartsWith("--"));
 
-        Lexer lexer = new Lexer(script);
-        List<Token> tokens = lexer.Tokenise();
-        Console.WriteLine("Processing...");
-        Console.WriteLine("-----------------------------------------");
-        tokens.ForEach(t => Console.WriteLine(t.ToString()));
+        if (path == null)
+        {
+            Console.Error.WriteLine("Usage: FriedChickenScript [--debug] <script.fc>");
+            return 1;
+        }
 
-        Console.WriteLine("-----------------------------------------");
-        Parser parser = new Parser(tokens);
-        ASTNode ASTRoot = parser.Parse();
+        string script = File.ReadAllText(path);
 
-        PrintTree(ASTRoot);
-        Console.WriteLine("-----------------------------------------");
-        Interpreter interpreter = new Interpreter();
-        interpreter.Interpret(ASTRoot);
-        interpreter.PrintVariables();
+        try
+        {
+            List<Token> tokens = new Lexer(script).Tokenise();
+            if (debug)
+            {
+                Console.WriteLine("--- tokens ---");
+                tokens.ForEach(t => Console.WriteLine(t));
+            }
+
+            ASTNode ast = new Parser(tokens).Parse();
+            if (debug)
+            {
+                Console.WriteLine("--- syntax tree ---");
+                PrintTree(ast);
+                Console.WriteLine("--- output ---");
+            }
+
+            new Interpreter().Run(ast);
+            return 0;
+        }
+        catch (FcParseException e)
+        {
+            Console.Error.WriteLine($"Syntax error: {e.Message}");
+            return 1;
+        }
+        catch (FcRuntimeException e)
+        {
+            Console.Error.WriteLine($"Runtime error: {e.Message}");
+            return 1;
+        }
     }
 
     static void PrintTree(ASTNode node, string indent = "", bool last = true)
     {
         Console.WriteLine(indent + "+- " + node);
         indent += last ? "   " : "|  ";
-
         for (int i = 0; i < node.Children.Count; i++)
         {
             PrintTree(node.Children[i], indent, i == node.Children.Count - 1);

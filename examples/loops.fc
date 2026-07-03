@@ -1,0 +1,9 @@
+// fryWhile loop: sum 0..4
+
+ingredient i = 0
+ingredient sum = 0
+fryWhile (i < 5) {
+    sum = sum + i
+    i = i + 1
+}
+print(sum)     // 10

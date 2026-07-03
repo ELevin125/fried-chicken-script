@@ -1,0 +1,15 @@
+// Recipes: parameters, serve (return), recursion, and return from inside an if
+
+recipe addStuff withExtra: a, b {
+    serve a + b
+}
+
+recipe factorial withExtra: n {
+    if (n < 2) {
+        serve 1
+    }
+    serve n * factorial(n - 1)
+}
+
+print(addStuff(3, 4))    // 7
+print(factorial(5))      // 120

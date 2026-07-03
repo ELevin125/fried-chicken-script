@@ -1,62 +1,43 @@
-﻿namespace FriedChickenScript;
+namespace FriedChickenScript;
 
 public static class MiscParser
 {
     public static ASTNode ParseBlock(Parser p)
     {
         ASTNode blockNode = new ASTNode(NodeType.Block);
-
-        while (p.GetCurrentToken().Type != TokenType.RightBrace && p.TokenIndex < p.tokens.Count)
+        while (p.GetCurrentToken()?.Type != TokenType.RightBrace && p.TokenIndex < p.Tokens.Count)
         {
             blockNode.AddChild(p.ParseStatement());
         }
-
         return blockNode;
     }
-    
-    public static ASTNode ParseObject(Parser p)
+
+    // print(expression)
+    public static ASTNode ParsePrintStatement(Parser p)
     {
-        p.Consume(TokenType.Keyword, Syntax.Object);
-
-        Token name = p.Consume(TokenType.Identifier);
-
-        ASTNode objNode = new ASTNode(NodeType.ObjDeclaration, name.Value);
-        p.Consume(TokenType.Operator, Syntax.Assignment);
-        p.Consume(TokenType.LeftBrace);
-
-        while (p.GetCurrentToken().Type != TokenType.RightBrace && p.TokenIndex < p.tokens.Count)
-        {
-            objNode.AddChild(p.ParseStatement());
-        }
-        p.Consume(TokenType.RightBrace);
-        return objNode;
+        p.Consume(TokenType.Keyword, Syntax.Print);
+        p.Consume(TokenType.LeftParen);
+        ASTNode printNode = new ASTNode(NodeType.PrintStatement);
+        printNode.AddChild(ExpressionParser.ParseExpression(p));
+        p.Consume(TokenType.RightParen);
+        return printNode;
     }
 
     public static ASTNode ParseIfStatement(Parser p)
     {
         p.Consume(TokenType.Keyword, Syntax.If);
-
         ASTNode ifNode = new ASTNode(NodeType.IfStatement);
 
-        // Parse condition
         p.Consume(TokenType.LeftParen);
         ifNode.AddChild(ExpressionParser.ParseExpression(p));
         p.Consume(TokenType.RightParen);
 
-        // Parse if block
-        p.Consume(TokenType.LeftBrace);
-        ifNode.AddChild(MiscParser.ParseBlock(p));
-        p.Consume(TokenType.RightBrace);
+        ifNode.AddChild(ParseBracedBlock(p));
 
-        // Check for else block
         if (p.GetCurrentToken()?.Value == Syntax.Else)
         {
             p.Consume(TokenType.Keyword, Syntax.Else);
-
-            // Parse else block
-            p.Consume(TokenType.LeftBrace);
-            ifNode.AddChild(MiscParser.ParseBlock(p));
-            p.Consume(TokenType.RightBrace);
+            ifNode.AddChild(ParseBracedBlock(p));
         }
 
         return ifNode;
@@ -65,19 +46,21 @@ public static class MiscParser
     public static ASTNode ParseWhileStatement(Parser p)
     {
         p.Consume(TokenType.Keyword, Syntax.While);
-
         ASTNode loopNode = new ASTNode(NodeType.WhileStatement);
 
-        // Parse condition
         p.Consume(TokenType.LeftParen);
         loopNode.AddChild(ExpressionParser.ParseExpression(p));
         p.Consume(TokenType.RightParen);
 
-        // Parse if block
-        p.Consume(TokenType.LeftBrace);
-        loopNode.AddChild(MiscParser.ParseBlock(p));
-        p.Consume(TokenType.RightBrace);
-
+        loopNode.AddChild(ParseBracedBlock(p));
         return loopNode;
+    }
+
+    private static ASTNode ParseBracedBlock(Parser p)
+    {
+        p.Consume(TokenType.LeftBrace);
+        ASTNode block = ParseBlock(p);
+        p.Consume(TokenType.RightBrace);
+        return block;
     }
 }
