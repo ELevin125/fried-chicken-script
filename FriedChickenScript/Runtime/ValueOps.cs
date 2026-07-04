@@ -100,6 +100,20 @@ public static class ValueOps
         throw new FcRuntimeException($"Operator '{op}' expects a number but got {Describe(value)}");
     }
 
+    // Unary minus: negate a number, preserving int vs double.
+    public static object Negate(object? value)
+    {
+        if (value is int i)
+        {
+            return -i;
+        }
+        if (value is double d)
+        {
+            return -d;
+        }
+        throw new FcRuntimeException($"Operator '-' expects a number but got {Describe(value)}");
+    }
+
     private static bool AreEqual(object? left, object? right)
     {
         if (left is null || right is null)

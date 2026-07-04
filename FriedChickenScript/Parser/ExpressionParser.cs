@@ -55,16 +55,18 @@ public static class ExpressionParser
         return left;
     }
 
-    // Prefix operators (e.g. `!x`), tighter than any binary operator. Right-recursive so
-    // `!!x` chains.
+    // Prefix operators (`!x`, `-x`), tighter than any binary operator. Right-recursive so
+    // `!!x` / `- -x` chain. The same `-` token is binary subtraction when it follows a value;
+    // here it's in operand position, so it's negation.
     private static ASTNode ParseUnary(Parser p)
     {
         Token? token = p.GetCurrentToken();
-        if (token != null && token.Type == TokenType.Operator && token.Value == Syntax.Not)
+        if (token != null && token.Type == TokenType.Operator
+            && (token.Value == Syntax.Not || token.Value == Syntax.Subtraction))
         {
-            p.Consume(TokenType.Operator, Syntax.Not);
+            p.Consume(TokenType.Operator, token.Value);
             ASTNode operand = ParseUnary(p);
-            ASTNode unary = new ASTNode(NodeType.UnaryExpression, Syntax.Not);
+            ASTNode unary = new ASTNode(NodeType.UnaryExpression, token.Value);
             unary.AddChild(operand);
             return unary;
         }

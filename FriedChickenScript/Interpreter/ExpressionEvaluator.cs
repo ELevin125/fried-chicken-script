@@ -39,8 +39,7 @@ public class ExpressionEvaluator
                 return EvaluateCall(node, env);
 
             case NodeType.UnaryExpression:
-                // Only `!` for now: logical negation over truthiness (RAW/EMPTY/0/"" are false).
-                return !ValueOps.Truthy(Evaluate(node.Children[0], env));
+                return EvaluateUnary(node, env);
 
             case NodeType.BinaryExpression:
                 return EvaluateBinary(node, env);
@@ -67,6 +66,21 @@ public class ExpressionEvaluator
             ? new List<object?>()
             : argsNode.Children.Select(a => Evaluate(a, env)).ToList();
         return interpreter.CallFunction(node.Value!, args);
+    }
+
+    private object? EvaluateUnary(ASTNode node, Environment env)
+    {
+        object? operand = Evaluate(node.Children[0], env);
+        switch (node.Value)
+        {
+            case Syntax.Not:
+                // Logical negation over truthiness (RAW / EMPTY / 0 / "" are false).
+                return !ValueOps.Truthy(operand);
+            case Syntax.Subtraction:
+                return ValueOps.Negate(operand);
+            default:
+                throw new FcRuntimeException($"Unknown unary operator '{node.Value}'");
+        }
     }
 
     private object? EvaluateBinary(ASTNode node, Environment env)
