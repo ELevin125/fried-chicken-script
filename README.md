@@ -6,7 +6,7 @@
 
 </div>
 
-Fried Chicken Script is a KFC-themed scripting language written in C#. It's an interpreted scripting language inspired by the simplicity of Python and the flexibility of JavaScript.
+Fried Chicken Script is a KFC-themed scripting language written in C#. It's an interpreted scripting language with a writing style similar to JavaScript
 
 ## Usage
 
