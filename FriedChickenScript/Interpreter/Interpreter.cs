@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace FriedChickenScript;
 
 // Tree-walking interpreter. Executes statements against an Environment (scope chain);
@@ -24,6 +26,12 @@ public class Interpreter
             [Syntax.ReadIO] = BuiltinReadInput,
             [Syntax.Random] = BuiltinRandom,
             [Syntax.RandomSeed] = BuiltinRandomSeed,
+            [Syntax.ToNumber] = BuiltinToNumber,
+            [Syntax.Min] = BuiltinMin,
+            [Syntax.Max] = BuiltinMax,
+            [Syntax.Abs] = BuiltinAbs,
+            [Syntax.Round] = BuiltinRound,
+            [Syntax.Sleep] = BuiltinSleep,
         };
     }
 
@@ -421,6 +429,131 @@ public class Interpreter
         }
         rng = new Random(AsWholeNumber(args[0], "randomSeed"));
         return null;
+    }
+
+    // toNumber(text) -> the number named by a string ("42" -> 42, "3.5" -> 3.5), or EMPTY
+    // when it isn't a number. Whole strings yield an int (so the result can index a list);
+    // fractional strings yield a double. Numbers pass straight through. Never throws (except
+    // on arity), so callers can validate input by testing the result against EMPTY.
+    private static object? BuiltinToNumber(List<object?> args)
+    {
+        if (args.Count != 1)
+        {
+            throw new FcRuntimeException($"'{Syntax.ToNumber}' expects 1 argument but got {args.Count}");
+        }
+        object? value = args[0];
+        if (value is int || value is double)
+        {
+            return value;
+        }
+        if (value is string s)
+        {
+            if (int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out int i))
+            {
+                return i;
+            }
+            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double d))
+            {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    // min(a, b, ...) / max(a, b, ...) -> the smallest / largest of two or more numbers,
+    // returning the winning argument unchanged (so an int stays an int).
+    private static object? BuiltinMin(List<object?> args) => MinMax(args, Syntax.Min, wantMax: false);
+    private static object? BuiltinMax(List<object?> args) => MinMax(args, Syntax.Max, wantMax: true);
+
+    private static object? MinMax(List<object?> args, string fn, bool wantMax)
+    {
+        if (args.Count < 2)
+        {
+            throw new FcRuntimeException($"'{fn}' expects at least 2 arguments but got {args.Count}");
+        }
+        object? best = args[0];
+        double bestNumber = RequireNumber(args[0], fn);
+        for (int i = 1; i < args.Count; i++)
+        {
+            double n = RequireNumber(args[i], fn);
+            if (wantMax ? n > bestNumber : n < bestNumber)
+            {
+                bestNumber = n;
+                best = args[i];
+            }
+        }
+        return best;
+    }
+
+    // abs(x) -> distance from zero, preserving int vs double.
+    private static object? BuiltinAbs(List<object?> args)
+    {
+        if (args.Count != 1)
+        {
+            throw new FcRuntimeException($"'{Syntax.Abs}' expects 1 argument but got {args.Count}");
+        }
+        if (args[0] is int i)
+        {
+            return Math.Abs(i);
+        }
+        if (args[0] is double d)
+        {
+            return Math.Abs(d);
+        }
+        throw new FcRuntimeException($"'{Syntax.Abs}' expects a number but got '{ValueOps.Stringify(args[0])}'");
+    }
+
+    // round(x)    -> nearest whole number as an int (ties round away from zero)
+    // round(x, n) -> x rounded to n decimal places as a double
+    private static object? BuiltinRound(List<object?> args)
+    {
+        if (args.Count == 1)
+        {
+            double x = RequireNumber(args[0], Syntax.Round);
+            return (int)Math.Round(x, MidpointRounding.AwayFromZero);
+        }
+        if (args.Count == 2)
+        {
+            double x = RequireNumber(args[0], Syntax.Round);
+            int digits = AsWholeNumber(args[1], Syntax.Round);
+            if (digits < 0 || digits > 15)
+            {
+                throw new FcRuntimeException($"'{Syntax.Round}' decimal places must be between 0 and 15");
+            }
+            return Math.Round(x, digits, MidpointRounding.AwayFromZero);
+        }
+        throw new FcRuntimeException($"'{Syntax.Round}' expects 1 or 2 argument(s) but got {args.Count}");
+    }
+
+    // letItCook(ms) -> pause for ms milliseconds, then carry on; returns EMPTY. For pacing
+    // output (e.g. a frying animation) rather than any real timing guarantee.
+    private static object? BuiltinSleep(List<object?> args)
+    {
+        if (args.Count != 1)
+        {
+            throw new FcRuntimeException($"'{Syntax.Sleep}' expects 1 argument but got {args.Count}");
+        }
+        int ms = AsWholeNumber(args[0], Syntax.Sleep);
+        if (ms < 0)
+        {
+            throw new FcRuntimeException($"'{Syntax.Sleep}' needs a non-negative number of milliseconds");
+        }
+        Thread.Sleep(ms);
+        return null;
+    }
+
+    // Require an int or double, returning it as a double; used by the numeric builtins.
+    private static double RequireNumber(object? value, string fn)
+    {
+        if (value is int i)
+        {
+            return i;
+        }
+        if (value is double d)
+        {
+            return d;
+        }
+        throw new FcRuntimeException($"'{fn}' expects a number but got '{ValueOps.Stringify(value)}'");
     }
 
     // Accept an int, or a double that has no fractional part; reject anything else so a

@@ -19,6 +19,13 @@ public static class Syntax
     public const string ReadIO = "takeOrder";
     public const string Random = "random";
     public const string RandomSeed = "randomSeed";
+    public const string ToNumber = "toNumber";
+    public const string Min = "min";
+    public const string Max = "max";
+    public const string Abs = "abs";
+    public const string Round = "round";
+    // letItCook(ms) — pause execution for a spell (sleep), for pacing output.
+    public const string Sleep = "letItCook";
 
     // The receiver bound inside a bucket's recipe, referring to the current instance
     // (so a method can read/write its own fields, e.g. `myBucket.pieces`).
