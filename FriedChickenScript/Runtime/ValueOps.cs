@@ -103,9 +103,9 @@ public static class ValueOps
             {
                 return parsed;
             }
-            return double.NaN;
+            throw new FcRuntimeException($"Operator '{op}' expects a number but got {Describe(value)}");
         }
-        
+
         // Treat null as 0 in arithmetic operations, similar to JS
         if (value is null)
         {
@@ -131,9 +131,9 @@ public static class ValueOps
             {
                 return -parsed;
             }
-            return double.NaN;
+            throw new FcRuntimeException($"Operator '-' expects a number but got {Describe(value)}");
         }
-        
+
         // Treat null as 0 in arithmetic operations, similar to JS
         if (value is null)
         {
