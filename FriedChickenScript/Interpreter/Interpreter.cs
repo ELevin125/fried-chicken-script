@@ -82,6 +82,7 @@ public class Interpreter
             case NodeType.MemberAccess:
             case NodeType.FunctionCall:
             case NodeType.BinaryExpression:
+            case NodeType.UnaryExpression:
                 return true;
             default:
                 return false;

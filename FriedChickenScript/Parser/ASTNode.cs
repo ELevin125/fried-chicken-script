@@ -32,6 +32,7 @@ public enum NodeType
 
     // Expressions
     BinaryExpression,      // Value = operator;    child[0] = left, child[1] = right
+    UnaryExpression,       // Value = operator;    child[0] = operand
     Identifier,            // Value = name
 
     // Literals

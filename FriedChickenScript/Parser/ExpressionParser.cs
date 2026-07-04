@@ -32,7 +32,7 @@ public static class ExpressionParser
 
     private static ASTNode ParseBinary(Parser p, int minPrecedence)
     {
-        ASTNode left = ParsePostfix(p);
+        ASTNode left = ParseUnary(p);
 
         while (true)
         {
@@ -53,6 +53,23 @@ public static class ExpressionParser
         }
 
         return left;
+    }
+
+    // Prefix operators (e.g. `!x`), tighter than any binary operator. Right-recursive so
+    // `!!x` chains.
+    private static ASTNode ParseUnary(Parser p)
+    {
+        Token? token = p.GetCurrentToken();
+        if (token != null && token.Type == TokenType.Operator && token.Value == Syntax.Not)
+        {
+            p.Consume(TokenType.Operator, Syntax.Not);
+            ASTNode operand = ParseUnary(p);
+            ASTNode unary = new ASTNode(NodeType.UnaryExpression, Syntax.Not);
+            unary.AddChild(operand);
+            return unary;
+        }
+
+        return ParsePostfix(p);
     }
 
     // Function calls and member access bind tighter than any binary operator.

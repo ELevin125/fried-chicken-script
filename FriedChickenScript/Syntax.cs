@@ -28,6 +28,7 @@ public static class Syntax
     // Logic Operators
     public const string And = "&&";
     public const string Or = "||";
+    public const string Not = "!";
     public const string Equality = "==";
     public const string Inequality = "!=";
     public const string LessThan = "<";

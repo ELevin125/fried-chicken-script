@@ -40,6 +40,7 @@ public static class TokenPatterns
             (Regex.Escape(Syntax.Or),              TokenType.Operator),
             (Regex.Escape(Syntax.Equality),        TokenType.Operator),
             (Regex.Escape(Syntax.Inequality),      TokenType.Operator),
+            (Regex.Escape(Syntax.Not),             TokenType.Operator),
             (Regex.Escape(Syntax.EqGreaterThan),   TokenType.Operator),
             (Regex.Escape(Syntax.EqLessThan),      TokenType.Operator),
             (Regex.Escape(Syntax.LessThan),        TokenType.Operator),

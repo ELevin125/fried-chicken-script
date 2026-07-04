@@ -38,6 +38,10 @@ public class ExpressionEvaluator
             case NodeType.FunctionCall:
                 return EvaluateCall(node, env);
 
+            case NodeType.UnaryExpression:
+                // Only `!` for now: logical negation over truthiness (RAW/EMPTY/0/"" are false).
+                return !ValueOps.Truthy(Evaluate(node.Children[0], env));
+
             case NodeType.BinaryExpression:
                 return EvaluateBinary(node, env);
 

@@ -10,13 +10,13 @@ public class InterpreterTests
     [Fact]
     public void EvaluatesPrecedence()
     {
-        Assert.Equal("14", Fc.Run("print(2 + 3 * 4)"));
+        Assert.Equal("14", Fc.Run("orderUp(2 + 3 * 4)"));
     }
 
     [Fact]
     public void SubtractionIsLeftAssociative()
     {
-        Assert.Equal("5", Fc.Run("print(10 - 2 - 3)"));
+        Assert.Equal("5", Fc.Run("orderUp(10 - 2 - 3)"));
     }
 
     [Fact]
@@ -25,15 +25,15 @@ public class InterpreterTests
         Assert.Equal(new[] { "8", "20" }, Fc.Lines(@"
             ingredient x = 5
             ingredient y = x + 3
-            print(y)
+            orderUp(y)
             y = y * 2 + 4
-            print(y)"));
+            orderUp(y)"));
     }
 
     [Fact]
     public void DivideByZeroThrows()
     {
-        Assert.Throws<FcRuntimeException>(() => Fc.Run("print(1 / 0)"));
+        Assert.Throws<FcRuntimeException>(() => Fc.Run("orderUp(1 / 0)"));
     }
 
     // --- strings ---
@@ -41,13 +41,13 @@ public class InterpreterTests
     [Fact]
     public void StringConcatDropsQuotes()
     {
-        Assert.Equal("ab", Fc.Run("print(\"a\" + \"b\")"));
+        Assert.Equal("ab", Fc.Run("orderUp(\"a\" + \"b\")"));
     }
 
     [Fact]
     public void StringNumberConcat()
     {
-        Assert.Equal("n=5", Fc.Run("print(\"n=\" + 5)"));
+        Assert.Equal("n=5", Fc.Run("orderUp(\"n=\" + 5)"));
     }
 
     // --- booleans / null ---
@@ -56,25 +56,25 @@ public class InterpreterTests
     public void BooleansAndNullPrintInLanguage()
     {
         Assert.Equal(new[] { "COOKED", "RAW", "EMPTY" }, Fc.Lines(@"
-            print(COOKED)
-            print(RAW)
-            print(EMPTY)"));
+            orderUp(COOKED)
+            orderUp(RAW)
+            orderUp(EMPTY)"));
     }
 
     [Fact]
     public void ComparisonsProduceBooleans()
     {
         Assert.Equal(new[] { "COOKED", "RAW" }, Fc.Lines(@"
-            print(5 > 3)
-            print(5 < 3)"));
+            orderUp(5 > 3)
+            orderUp(5 < 3)"));
     }
 
     [Fact]
     public void LogicalOperators()
     {
         Assert.Equal(new[] { "COOKED", "RAW" }, Fc.Lines(@"
-            print((1 < 2) || (2 < 1))
-            print((1 < 2) && (2 < 1))"));
+            orderUp((1 < 2) || (2 < 1))
+            orderUp((1 < 2) && (2 < 1))"));
     }
 
     // --- control flow ---
@@ -83,9 +83,9 @@ public class InterpreterTests
     public void IfElseTakesCorrectBranch()
     {
         Assert.Equal("yes", Fc.Run(@"
-            if (5 > 3) { print(""yes"") } else { print(""no"") }"));
+            if (5 > 3) { orderUp(""yes"") } else { orderUp(""no"") }"));
         Assert.Equal("no", Fc.Run(@"
-            if (5 < 3) { print(""yes"") } else { print(""no"") }"));
+            if (5 < 3) { orderUp(""yes"") } else { orderUp(""no"") }"));
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class InterpreterTests
                 sum = sum + i
                 i = i + 1
             }
-            print(sum)"));
+            orderUp(sum)"));
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class InterpreterTests
         Assert.Equal("500000", Fc.Run(@"
             ingredient i = 0
             fryWhile (i < 500000) { i = i + 1 }
-            print(i)"));
+            orderUp(i)"));
     }
 
     // --- functions ---
@@ -117,7 +117,7 @@ public class InterpreterTests
     {
         Assert.Equal("7", Fc.Run(@"
             recipe addStuff withSides: a, b { serve a + b }
-            print(addStuff(3, 4))"));
+            orderUp(addStuff(3, 4))"));
     }
 
     [Fact]
@@ -128,14 +128,14 @@ public class InterpreterTests
                 if (n < 2) { serve 1 }
                 serve n * factorial(n - 1)
             }
-            print(factorial(5))"));
+            orderUp(factorial(5))"));
     }
 
     [Fact]
     public void FunctionsCanBeCalledBeforeTheyAreDeclared()
     {
         Assert.Equal("9", Fc.Run(@"
-            print(square(3))
+            orderUp(square(3))
             recipe square withSides: n { serve n * n }"));
     }
 
@@ -144,7 +144,7 @@ public class InterpreterTests
     {
         Assert.Throws<FcRuntimeException>(() => Fc.Run(@"
             recipe f withSides: a, b { serve a }
-            print(f(1))"));
+            orderUp(f(1))"));
     }
 
     // --- objects (buckets) ---
@@ -161,9 +161,9 @@ public class InterpreterTests
             Order myOrder
             myOrder.pieces = 12
             myOrder.isSpicy = COOKED
-            print(myOrder.recipeName)
-            print(myOrder.pieces)
-            print(myOrder.isSpicy)"));
+            orderUp(myOrder.recipeName)
+            orderUp(myOrder.pieces)
+            orderUp(myOrder.isSpicy)"));
     }
 
     [Fact]
@@ -181,8 +181,8 @@ public class InterpreterTests
                 serve m
             }
             Meal dinner = cook(12, COOKED)
-            print(dinner.content)
-            print(dinner.isSpicy)"));
+            orderUp(dinner.content)
+            orderUp(dinner.isSpicy)"));
     }
 
     [Fact]
@@ -191,8 +191,8 @@ public class InterpreterTests
         Assert.Throws<FcRuntimeException>(() => Fc.Run(@"
             bucket B { ingredient secret = 99 }
             B b
-            print(b.secret)
-            print(secret)"));
+            orderUp(b.secret)
+            orderUp(secret)"));
     }
 
     [Fact]
@@ -212,7 +212,7 @@ public class InterpreterTests
     {
         Assert.Throws<FcRuntimeException>(() => Fc.Run(@"
             if (COOKED) { ingredient inner = 1 }
-            print(inner)"));
+            orderUp(inner)"));
     }
 
     [Fact]
