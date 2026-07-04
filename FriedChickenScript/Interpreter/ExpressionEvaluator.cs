@@ -1,6 +1,8 @@
+using System.Globalization;
+
 namespace FriedChickenScript;
 
-// Evaluates expression nodes to runtime values (int / string / bool / null / FcObject).
+// Evaluates expression nodes to runtime values (int / double / string / bool / null / FcObject).
 // Statement execution and function calls are delegated back to the Interpreter.
 public class ExpressionEvaluator
 {
@@ -16,7 +18,7 @@ public class ExpressionEvaluator
         switch (node.Type)
         {
             case NodeType.NumberLiteral:
-                return int.Parse(node.Value!);
+                return ParseNumber(node.Value!);
 
             case NodeType.StringLiteral:
                 return node.Value;
@@ -76,5 +78,15 @@ public class ExpressionEvaluator
         object? left = Evaluate(node.Children[0], env);
         object? right = Evaluate(node.Children[1], env);
         return ValueOps.Apply(op, left, right);
+    }
+
+    // A literal with a decimal point is a double; otherwise an int
+    private static object ParseNumber(string text)
+    {
+        if (text.Contains('.'))
+        {
+            return double.Parse(text, CultureInfo.InvariantCulture);
+        }
+        return int.Parse(text);
     }
 }

@@ -51,7 +51,7 @@ public static class TokenPatterns
             (Regex.Escape(Syntax.Multiplication),  TokenType.Operator),
             (Regex.Escape(Syntax.Dot),             TokenType.Operator),
 
-            (@"[0-9]+",                            TokenType.Number),
+            (@"[0-9]+(\.[0-9]+)?",                 TokenType.Number),
             ("\"([^\"]*)\"",                       TokenType.StringLiteral),
 
             (@"\(",                                TokenType.LeftParen),
