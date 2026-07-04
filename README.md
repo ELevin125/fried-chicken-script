@@ -10,10 +10,8 @@ Fried Chicken Script is a KFC-themed scripting language written in C#. It's an i
 
 ## Usage
 
-If a script file is supplied, the interpreter executes it.
-
 ```fc
-orderUp("Hello, World!")
+orderUp("Hello, Chicken!")
 ```
 
 ### Running

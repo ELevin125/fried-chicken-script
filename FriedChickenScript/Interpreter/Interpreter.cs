@@ -86,6 +86,7 @@ public class Interpreter
             case NodeType.ArrayLiteral:
             case NodeType.IndexAccess:
             case NodeType.MethodCall:
+            case NodeType.ReadIOExpression:
                 return true;
             default:
                 return false;

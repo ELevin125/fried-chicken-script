@@ -97,6 +97,20 @@ public static class ValueOps
         {
             return d;
         }
+        if (value is string s)
+        {
+            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed))
+            {
+                return parsed;
+            }
+            return double.NaN;
+        }
+        
+        // Treat null as 0 in arithmetic operations, similar to JS
+        if (value is null)
+        {
+            return 0;
+        }
         throw new FcRuntimeException($"Operator '{op}' expects a number but got {Describe(value)}");
     }
 
@@ -110,6 +124,20 @@ public static class ValueOps
         if (value is double d)
         {
             return -d;
+        }
+        if (value is string s)
+        {
+            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed))
+            {
+                return -parsed;
+            }
+            return double.NaN;
+        }
+        
+        // Treat null as 0 in arithmetic operations, similar to JS
+        if (value is null)
+        {
+            return 0;
         }
         throw new FcRuntimeException($"Operator '-' expects a number but got {Describe(value)}");
     }

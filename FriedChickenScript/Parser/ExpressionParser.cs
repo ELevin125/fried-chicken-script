@@ -132,6 +132,12 @@ public static class ExpressionParser
     {
         Token token = p.Require();
 
+        // Check for our takeOrder expression keyword first
+        if (token.Type == TokenType.Keyword && token.Value == Syntax.ReadIO)
+        {
+            return MiscParser.ParseReadIOExpression(p);
+        }
+
         switch (token.Type)
         {
             case TokenType.Number:

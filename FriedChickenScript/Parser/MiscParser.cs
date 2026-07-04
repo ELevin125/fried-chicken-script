@@ -23,6 +23,15 @@ public static class MiscParser
         return printNode;
     }
 
+    public static ASTNode ParseReadIOExpression(Parser p)
+    {
+        p.Consume(TokenType.Keyword, Syntax.ReadIO);
+        p.Consume(TokenType.LeftParen);
+        ASTNode readIONode = new ASTNode(NodeType.ReadIOExpression);
+        p.Consume(TokenType.RightParen);
+        return readIONode;
+    }
+
     public static ASTNode ParseIfStatement(Parser p)
     {
         p.Consume(TokenType.Keyword, Syntax.If);

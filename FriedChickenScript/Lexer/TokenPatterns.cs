@@ -28,6 +28,7 @@ public static class TokenPatterns
             ($@"\b{Syntax.Else}\b",                TokenType.Keyword),
             ($@"\b{Syntax.While}\b",               TokenType.Keyword),
             ($@"\b{Syntax.Print}\b",               TokenType.Keyword),
+            ($@"\b{Syntax.ReadIO}\b",              TokenType.Keyword),
 
             ($@"\b{Syntax.True}\b",                TokenType.ConstLiteral),
             ($@"\b{Syntax.False}\b",               TokenType.ConstLiteral),

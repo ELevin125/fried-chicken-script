@@ -1,4 +1,4 @@
-﻿namespace FriedChickenScript;
+namespace FriedChickenScript;
 
 public static class Syntax
 {
@@ -12,6 +12,7 @@ public static class Syntax
     public const string Else = "else";
     public const string While = "fryWhile";
     public const string Print = "orderUp";
+    public const string ReadIO = "takeOrder";
 
     // Constants
     public const string True = "COOKED";

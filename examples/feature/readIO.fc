@@ -1,0 +1,10 @@
+
+
+orderUp("Please enter your order:")
+ingredient order = takeOrder()
+
+orderUp("You want: " + order)
+orderUp("That will be $5. Please enter how much you are paying:")
+ingredient payAmount = takeOrder()
+ingredient change = payAmount - 5
+orderUp("Thank you, your change is: $" + change)
