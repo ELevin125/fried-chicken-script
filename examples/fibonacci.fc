@@ -1,0 +1,18 @@
+recipe fibonacci withExtra: count {
+
+    ingredient a = 0
+    ingredient b = 1
+    ingredient i = 0
+
+    fryWhile (i < count) {
+        orderUp(a)
+
+        ingredient next = a + b
+        a = b
+        b = next
+
+        i = i + 1
+    }
+}
+
+fibonacci(15)

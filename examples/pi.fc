@@ -1,0 +1,13 @@
+ingredient iterations = 100000
+ingredient pi = 0
+ingredient sign = 1
+ingredient i = 0
+
+fryWhile (i < iterations) {
+    pi = pi + (4.0 / (2 * i + 1)) * sign
+    sign = sign * -1
+    i = i + 1
+}
+
+orderUp("Estimated PI:")
+orderUp(pi)
