@@ -35,6 +35,15 @@ public class ExpressionEvaluator
             case NodeType.MemberAccess:
                 return EvaluateMemberAccess(node, env);
 
+            case NodeType.ArrayLiteral:
+                return node.Children.Select(c => Evaluate(c, env)).ToList();
+
+            case NodeType.IndexAccess:
+                return EvaluateIndexAccess(node, env);
+
+            case NodeType.MethodCall:
+                return EvaluateMethodCall(node, env);
+
             case NodeType.FunctionCall:
                 return EvaluateCall(node, env);
 
@@ -52,11 +61,103 @@ public class ExpressionEvaluator
     private object? EvaluateMemberAccess(ASTNode node, Environment env)
     {
         object? target = Evaluate(node.Children[0], env);
+
+        if (target is List<object?> list)
+        {
+            if (node.Value == "length")
+            {
+                return list.Count;
+            }
+            throw new FcRuntimeException($"Lists have no member '{node.Value}' (try .length)");
+        }
+
         if (target is not FcObject obj)
+        {
             throw new FcRuntimeException($"Cannot read field '{node.Value}' from a non-object value");
+        }
         if (!obj.Fields.TryGetValue(node.Value!, out var value))
+        {
             throw new FcRuntimeException($"'{obj.TypeName}' has no field '{node.Value}'");
+        }
         return value;
+    }
+
+    private object? EvaluateIndexAccess(ASTNode node, Environment env)
+    {
+        List<object?> list = AsList(Evaluate(node.Children[0], env));
+        int index = AsIndex(Evaluate(node.Children[1], env), list.Count);
+        return list[index];
+    }
+
+    private object? EvaluateMethodCall(ASTNode node, Environment env)
+    {
+        object? target = Evaluate(node.Children[0], env);
+        ASTNode? argsNode = node.Children.FirstOrDefault(c => c.Type == NodeType.Arguments);
+        List<object?> args = argsNode == null
+            ? new List<object?>()
+            : argsNode.Children.Select(a => Evaluate(a, env)).ToList();
+
+        if (target is List<object?> list)
+        {
+            return CallListMethod(list, node.Value!, args);
+        }
+        throw new FcRuntimeException($"Value has no method '{node.Value}'");
+    }
+
+    private static object? CallListMethod(List<object?> list, string method, List<object?> args)
+    {
+        switch (method)
+        {
+            case "length":
+                RequireArgs(method, args, 0);
+                return list.Count;
+
+            case "add":
+                RequireArgs(method, args, 1);
+                list.Add(args[0]);
+                return null;
+
+            case "remove":
+                RequireArgs(method, args, 1);
+                int index = AsIndex(args[0], list.Count);
+                object? removed = list[index];
+                list.RemoveAt(index);
+                return removed;
+
+            default:
+                throw new FcRuntimeException($"Lists have no method '{method}' (try add, remove, length)");
+        }
+    }
+
+    // Shared list-access guards, also used by the interpreter's index-assignment.
+    public static List<object?> AsList(object? value)
+    {
+        if (value is List<object?> list)
+        {
+            return list;
+        }
+        throw new FcRuntimeException("Value is not a list");
+    }
+
+    public static int AsIndex(object? value, int count)
+    {
+        if (value is not int index)
+        {
+            throw new FcRuntimeException("List index must be a whole number");
+        }
+        if (index < 0 || index >= count)
+        {
+            throw new FcRuntimeException($"Index {index} is out of range (list length {count})");
+        }
+        return index;
+    }
+
+    private static void RequireArgs(string method, List<object?> args, int expected)
+    {
+        if (args.Count != expected)
+        {
+            throw new FcRuntimeException($"'{method}' expects {expected} argument(s) but got {args.Count}");
+        }
     }
 
     private object? EvaluateCall(ASTNode node, Environment env)

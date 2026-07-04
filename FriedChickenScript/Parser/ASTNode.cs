@@ -30,6 +30,12 @@ public enum NodeType
     MemberAccess,          // Value = field name;  child[0] = target expression
     MemberAssignment,      // Value = field name;  child[0] = target expr, child[1] = value expr
 
+    // Arrays / lists
+    ArrayLiteral,          // children = element expressions
+    IndexAccess,           // child[0] = target, child[1] = index expr
+    IndexAssignment,       // child[0] = target, child[1] = index expr, child[2] = value expr
+    MethodCall,            // Value = method name; child[0] = target, [child[1] = Arguments]
+
     // Expressions
     BinaryExpression,      // Value = operator;    child[0] = left, child[1] = right
     UnaryExpression,       // Value = operator;    child[0] = operand

@@ -59,6 +59,8 @@ public static class TokenPatterns
             (@"\)",                                TokenType.RightParen),
             (@"\{",                                TokenType.LeftBrace),
             (@"\}",                                TokenType.RightBrace),
+            (@"\[",                                TokenType.LeftBracket),
+            (@"\]",                                TokenType.RightBracket),
         };
 
         var patterns = new List<(Regex, TokenType)>(rules.Length);

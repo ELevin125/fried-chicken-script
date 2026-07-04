@@ -150,6 +150,7 @@ public static class ValueOps
             null => Syntax.Null,
             bool b => b ? Syntax.True : Syntax.False,
             double d => d.ToString(CultureInfo.InvariantCulture),
+            List<object?> list => "[" + string.Join(", ", list.Select(Stringify)) + "]",
             _ => value.ToString() ?? "",
         };
     }

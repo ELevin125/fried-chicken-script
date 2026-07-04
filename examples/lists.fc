@@ -1,0 +1,26 @@
+// Lists: literals, get/set, length, add, remove
+
+ingredient parts = ["wing", "thigh", "breast"]
+orderUp(parts)              // [wing, thigh, breast]
+orderUp(parts.length)       // 3
+
+// get / set by index
+orderUp(parts[0])           // wing
+parts[0] = "drumstick"
+orderUp(parts[0])           // drumstick
+
+// add a new entry
+parts.add("rib")
+orderUp(parts.length)       // 4
+
+// remove by index (returns what was removed)
+ingredient dropped = parts.remove(1)
+orderUp(dropped)            // thigh
+orderUp(parts)              // [drumstick, breast, rib]
+
+// walk the list
+ingredient i = 0
+fryWhile (i < parts.length) {
+    orderUp(parts[i])
+    i = i + 1
+}

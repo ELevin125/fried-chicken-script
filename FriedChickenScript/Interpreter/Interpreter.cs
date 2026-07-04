@@ -83,6 +83,9 @@ public class Interpreter
             case NodeType.FunctionCall:
             case NodeType.BinaryExpression:
             case NodeType.UnaryExpression:
+            case NodeType.ArrayLiteral:
+            case NodeType.IndexAccess:
+            case NodeType.MethodCall:
                 return true;
             default:
                 return false;
@@ -122,6 +125,10 @@ public class Interpreter
                 ExecuteMemberAssignment(node, env);
                 break;
 
+            case NodeType.IndexAssignment:
+                ExecuteIndexAssignment(node, env);
+                break;
+
             case NodeType.FunctionDeclaration:
                 RegisterFunction(node);
                 break;
@@ -136,6 +143,10 @@ public class Interpreter
 
             case NodeType.FunctionCall:
                 Evaluate(node, env); // called for its effect; return value discarded
+                break;
+
+            case NodeType.MethodCall:
+                Evaluate(node, env); // e.g. parts.add(x) used as a statement
                 break;
 
             case NodeType.ReturnStatement:
@@ -231,6 +242,13 @@ public class Interpreter
         if (!obj.Fields.ContainsKey(node.Value!))
             throw new FcRuntimeException($"'{obj.TypeName}' has no field '{node.Value}'");
         obj.Fields[node.Value!] = Evaluate(node.Children[1], env);
+    }
+
+    private void ExecuteIndexAssignment(ASTNode node, Environment env)
+    {
+        List<object?> list = ExpressionEvaluator.AsList(Evaluate(node.Children[0], env));
+        int index = ExpressionEvaluator.AsIndex(Evaluate(node.Children[1], env), list.Count);
+        list[index] = Evaluate(node.Children[2], env);
     }
 
     private void RegisterFunction(ASTNode node)

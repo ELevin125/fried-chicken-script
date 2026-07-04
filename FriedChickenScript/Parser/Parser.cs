@@ -69,6 +69,13 @@ public class Parser
                 member.AddChild(value);
                 return member;
 
+            case NodeType.IndexAccess:
+                ASTNode indexed = new ASTNode(NodeType.IndexAssignment);
+                indexed.AddChild(target.Children[0]); // the list
+                indexed.AddChild(target.Children[1]); // the index
+                indexed.AddChild(value);
+                return indexed;
+
             default:
                 throw new FcParseException($"Invalid assignment target: {target.Type}");
         }

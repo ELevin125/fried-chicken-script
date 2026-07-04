@@ -89,6 +89,18 @@ public static class ExpressionParser
             {
                 node = FunctionParser.ParseFunctionCall(p, node.Value!);
             }
+            else if (next.Type == TokenType.LeftParen && node.Type == NodeType.MemberAccess)
+            {
+                // `target.method(args)` — the `.method` already parsed into a MemberAccess.
+                ASTNode call = new ASTNode(NodeType.MethodCall, node.Value);
+                call.AddChild(node.Children[0]); // the receiver
+                ASTNode? args = FunctionParser.ParseArguments(p);
+                if (args != null)
+                {
+                    call.AddChild(args);
+                }
+                node = call;
+            }
             else if (next.Type == TokenType.Operator && next.Value == Syntax.Dot)
             {
                 p.Consume(TokenType.Operator, Syntax.Dot);
@@ -96,6 +108,16 @@ public static class ExpressionParser
                 ASTNode access = new ASTNode(NodeType.MemberAccess, field.Value);
                 access.AddChild(node);
                 node = access;
+            }
+            else if (next.Type == TokenType.LeftBracket)
+            {
+                p.Consume(TokenType.LeftBracket);
+                ASTNode index = ParseExpression(p);
+                p.Consume(TokenType.RightBracket);
+                ASTNode indexed = new ASTNode(NodeType.IndexAccess);
+                indexed.AddChild(node); // the target
+                indexed.AddChild(index);
+                node = indexed;
             }
             else
             {
@@ -134,9 +156,33 @@ public static class ExpressionParser
                 p.Consume(TokenType.RightParen);
                 return inner;
 
+            case TokenType.LeftBracket:
+                return ParseArrayLiteral(p);
+
             default:
                 throw new FcParseException($"Unexpected token {token.Type} '{token.Value}' at line {token.Line}");
         }
+    }
+
+    // `[e1, e2, ...]` — a list literal (empty `[]` allowed).
+    private static ASTNode ParseArrayLiteral(Parser p)
+    {
+        p.Consume(TokenType.LeftBracket);
+        ASTNode array = new ASTNode(NodeType.ArrayLiteral);
+        while (p.GetCurrentToken()?.Type != TokenType.RightBracket)
+        {
+            array.AddChild(ParseExpression(p));
+            if (p.GetCurrentToken()?.Type == TokenType.Delimiter)
+            {
+                p.Consume(TokenType.Delimiter);
+            }
+            else
+            {
+                break;
+            }
+        }
+        p.Consume(TokenType.RightBracket);
+        return array;
     }
 
     private static ASTNode ConstLiteral(string value)

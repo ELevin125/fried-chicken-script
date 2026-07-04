@@ -58,6 +58,6 @@ public class LexerTests
     [Fact]
     public void UnexpectedCharacterThrows()
     {
-        Assert.Throws<FcParseException>(() => new Lexer("ingredient x = [").Tokenise());
+        Assert.Throws<FcParseException>(() => new Lexer("ingredient x = $").Tokenise());
     }
 }
