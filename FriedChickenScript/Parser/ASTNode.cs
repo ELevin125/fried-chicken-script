@@ -16,10 +16,6 @@ public enum NodeType
     FunctionCall,          // Value = name;        optional Arguments child
     ReturnStatement,       // child[0] = expression
 
-    // IO
-    PrintStatement,        // child[0] = expression
-    ReadIOExpression,         // Value = text from IO
-
     // Control flow
     IfStatement,           // child[0] = condition, child[1] = then-Block, [child[2] = else-Block]
     WhileStatement,        // child[0] = condition, child[1] = body-Block

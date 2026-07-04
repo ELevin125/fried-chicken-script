@@ -34,7 +34,6 @@ public class Parser
                 case Syntax.Return:   return FunctionParser.ParseReturn(this);
                 case Syntax.If:       return MiscParser.ParseIfStatement(this);
                 case Syntax.While:    return MiscParser.ParseWhileStatement(this);
-                case Syntax.Print:    return MiscParser.ParsePrintStatement(this);
             }
         }
 

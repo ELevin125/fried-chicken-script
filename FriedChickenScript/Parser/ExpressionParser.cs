@@ -26,6 +26,7 @@ public static class ExpressionParser
         [Syntax.Subtraction]   = 5,
         [Syntax.Multiplication]= 6,
         [Syntax.Division]      = 6,
+        [Syntax.Modulo]        = 6,
     };
 
     public static ASTNode ParseExpression(Parser p) => ParseBinary(p, 0);
@@ -134,9 +135,6 @@ public static class ExpressionParser
 
         switch (token.Type)
         {
-            case TokenType.Keyword when token.Value == Syntax.ReadIO:
-                return ParseReadIOExpression(p);
-
             case TokenType.Number:
                 p.Consume(TokenType.Number);
                 return new ASTNode(NodeType.NumberLiteral, token.Value);
@@ -165,15 +163,6 @@ public static class ExpressionParser
             default:
                 throw new FcParseException($"Unexpected token {token.Type} '{token.Value}' at line {token.Line}");
         }
-    }
-
-    // takeOrder() — a primary expression; the actual read happens at eval time.
-    private static ASTNode ParseReadIOExpression(Parser p)
-    {
-        p.Consume(TokenType.Keyword, Syntax.ReadIO);
-        p.Consume(TokenType.LeftParen);
-        p.Consume(TokenType.RightParen);
-        return new ASTNode(NodeType.ReadIOExpression);
     }
 
     // `[e1, e2, ...]` — a list literal (empty `[]` allowed).

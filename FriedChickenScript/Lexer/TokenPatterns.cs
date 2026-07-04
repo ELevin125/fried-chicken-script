@@ -27,8 +27,6 @@ public static class TokenPatterns
             ($@"\b{Syntax.If}\b",                  TokenType.Keyword),
             ($@"\b{Syntax.Else}\b",                TokenType.Keyword),
             ($@"\b{Syntax.While}\b",               TokenType.Keyword),
-            ($@"\b{Syntax.Print}\b",               TokenType.Keyword),
-            ($@"\b{Syntax.ReadIO}\b",              TokenType.Keyword),
 
             ($@"\b{Syntax.True}\b",                TokenType.ConstLiteral),
             ($@"\b{Syntax.False}\b",               TokenType.ConstLiteral),
@@ -51,6 +49,7 @@ public static class TokenPatterns
             (Regex.Escape(Syntax.Subtraction),     TokenType.Operator),
             (Regex.Escape(Syntax.Division),        TokenType.Operator),
             (Regex.Escape(Syntax.Multiplication),  TokenType.Operator),
+            (Regex.Escape(Syntax.Modulo),          TokenType.Operator),
             (Regex.Escape(Syntax.Dot),             TokenType.Operator),
 
             (@"[0-9]+(\.[0-9]+)?",                 TokenType.Number),

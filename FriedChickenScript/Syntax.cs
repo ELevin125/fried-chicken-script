@@ -1,4 +1,4 @@
-namespace FriedChickenScript;
+﻿namespace FriedChickenScript;
 
 public static class Syntax
 {
@@ -11,8 +11,13 @@ public static class Syntax
     public const string If = "if";
     public const string Else = "else";
     public const string While = "fryWhile";
+
+    // Builtins - runtime-provided functions, called like any recipe (name(args)). These are
+    // NOT keywords — they are reserved identifiers so a program can't shadow them.
     public const string Print = "orderUp";
     public const string ReadIO = "takeOrder";
+    public const string Random = "random";
+    public const string RandomSeed = "randomSeed";
 
     // The receiver bound inside a bucket's recipe, referring to the current instance
     // (so a method can read/write its own fields, e.g. `myBucket.pieces`).
@@ -29,6 +34,7 @@ public static class Syntax
     public const string Subtraction = "-";
     public const string Multiplication = "*";
     public const string Division = "/";
+    public const string Modulo = "%";
 
     // Logic Operators
     public const string And = "&&";

@@ -12,17 +12,6 @@ public static class MiscParser
         return blockNode;
     }
 
-    // print(expression)
-    public static ASTNode ParsePrintStatement(Parser p)
-    {
-        p.Consume(TokenType.Keyword, Syntax.Print);
-        p.Consume(TokenType.LeftParen);
-        ASTNode printNode = new ASTNode(NodeType.PrintStatement);
-        printNode.AddChild(ExpressionParser.ParseExpression(p));
-        p.Consume(TokenType.RightParen);
-        return printNode;
-    }
-
     public static ASTNode ParseIfStatement(Parser p)
     {
         p.Consume(TokenType.Keyword, Syntax.If);

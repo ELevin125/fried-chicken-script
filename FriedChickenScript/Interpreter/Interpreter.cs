@@ -8,11 +8,23 @@ public class Interpreter
     private readonly Environment globals = new();
     private readonly Dictionary<string, Function> functions = new();
     private readonly Dictionary<string, TypeDefinition> types = new();
+    private readonly Dictionary<string, Func<List<object?>, object?>> builtins;
     private readonly ExpressionEvaluator evaluator;
+
+    // Source of randomness for the `random` builtin. Time-seeded by default (so each run
+    // differs); `randomSeed` swaps in a fixed seed for reproducible runs.
+    private Random rng = new();
 
     public Interpreter()
     {
         evaluator = new ExpressionEvaluator(this);
+        builtins = new Dictionary<string, Func<List<object?>, object?>>
+        {
+            [Syntax.Print] = BuiltinPrint,
+            [Syntax.ReadIO] = BuiltinReadInput,
+            [Syntax.Random] = BuiltinRandom,
+            [Syntax.RandomSeed] = BuiltinRandomSeed,
+        };
     }
 
     public void Run(ASTNode program)
@@ -86,7 +98,6 @@ public class Interpreter
             case NodeType.ArrayLiteral:
             case NodeType.IndexAccess:
             case NodeType.MethodCall:
-            case NodeType.ReadIOExpression:
                 return true;
             default:
                 return false;
@@ -113,6 +124,7 @@ public class Interpreter
                 break;
 
             case NodeType.VariableDeclaration:
+                EnsureNotBuiltin(node.Value!);
                 if (env.ExistsLocally(node.Value!))
                     throw new FcRuntimeException($"'{node.Value}' is already defined in this scope");
                 env.Define(node.Value!, Evaluate(node.Children[0], env));
@@ -153,10 +165,6 @@ public class Interpreter
             case NodeType.ReturnStatement:
                 throw new ReturnException(Evaluate(node.Children[0], env));
 
-            case NodeType.PrintStatement:
-                Console.WriteLine(ValueOps.Stringify(Evaluate(node.Children[0], env)));
-                break;
-
             case NodeType.IfStatement:
                 if (ValueOps.Truthy(Evaluate(node.Children[0], env)))
                     Execute(node.Children[1], env);
@@ -181,6 +189,8 @@ public class Interpreter
     // Called from ExpressionEvaluator for both statement and expression calls.
     public object? CallFunction(string name, List<object?> args)
     {
+        if (builtins.TryGetValue(name, out var builtin))
+            return builtin(args);
         if (!functions.TryGetValue(name, out var function))
             throw new FcRuntimeException($"Recipe '{name}' is not defined");
         if (function.Parameters.Count != args.Count)
@@ -286,7 +296,18 @@ public class Interpreter
 
     private void RegisterFunction(ASTNode node)
     {
+        EnsureNotBuiltin(node.Value!);
         functions[node.Value!] = BuildFunction(node);
+    }
+
+    // Builtins are reserved: a program can't declare a recipe or variable that shadows one,
+    // since the shadow would be silently ignored at call time.
+    private void EnsureNotBuiltin(string name)
+    {
+        if (builtins.ContainsKey(name))
+        {
+            throw new FcRuntimeException($"'{name}' is a builtin and cannot be redefined");
+        }
     }
 
     private void RegisterType(ASTNode node)
@@ -311,5 +332,72 @@ public class Interpreter
             .ToList();
         var body = node.Children.First(c => c.Type == NodeType.Block);
         return new Function(node.Value!, parameters, body);
+    }
+
+    // orderUp(value) -> print one value on its own line; returns EMPTY.
+    private object? BuiltinPrint(List<object?> args)
+    {
+        if (args.Count != 1)
+        {
+            throw new FcRuntimeException($"'{Syntax.Print}' expects 1 argument but got {args.Count}");
+        }
+        Console.WriteLine(ValueOps.Stringify(args[0]));
+        return null;
+    }
+
+    // takeOrder() -> read one line of input, or "" at end of input.
+    private object? BuiltinReadInput(List<object?> args)
+    {
+        if (args.Count != 0)
+        {
+            throw new FcRuntimeException($"'{Syntax.ReadIO}' expects no arguments but got {args.Count}");
+        }
+        return Console.ReadLine() ?? "";
+    }
+
+    // random()  -> a double in [0, 1)
+    // random(n) -> a whole number in [0, n), where n is a positive whole number
+    private object? BuiltinRandom(List<object?> args)
+    {
+        if (args.Count == 0)
+        {
+            return rng.NextDouble();
+        }
+        if (args.Count == 1)
+        {
+            int bound = AsWholeNumber(args[0], "random");
+            if (bound <= 0)
+            {
+                throw new FcRuntimeException("'random' needs a positive whole number, e.g. random(6)");
+            }
+            return rng.Next(bound);
+        }
+        throw new FcRuntimeException($"'random' expects 0 or 1 argument(s) but got {args.Count}");
+    }
+
+    // randomSeed(n) -> reseed the generator so a run is reproducible; returns EMPTY.
+    private object? BuiltinRandomSeed(List<object?> args)
+    {
+        if (args.Count != 1)
+        {
+            throw new FcRuntimeException($"'randomSeed' expects 1 argument but got {args.Count}");
+        }
+        rng = new Random(AsWholeNumber(args[0], "randomSeed"));
+        return null;
+    }
+
+    // Accept an int, or a double that has no fractional part; reject anything else so a
+    // stray string or object surfaces a clear error rather than a silent truncation.
+    private static int AsWholeNumber(object? value, string fn)
+    {
+        if (value is int i)
+        {
+            return i;
+        }
+        if (value is double d && d == Math.Floor(d))
+        {
+            return (int)d;
+        }
+        throw new FcRuntimeException($"'{fn}' expects a whole number");
     }
 }

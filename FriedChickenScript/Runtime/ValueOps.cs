@@ -16,6 +16,7 @@ public static class ValueOps
             case Syntax.Subtraction:    return Arithmetic(op, left, right);
             case Syntax.Multiplication: return Arithmetic(op, left, right);
             case Syntax.Division:       return Arithmetic(op, left, right);
+            case Syntax.Modulo:         return Arithmetic(op, left, right);
 
             case Syntax.And:            return Truthy(left) && Truthy(right);
             case Syntax.Or:             return Truthy(left) || Truthy(right);
@@ -50,7 +51,7 @@ public static class ValueOps
         return AsDouble(left, Syntax.Addition) + AsDouble(right, Syntax.Addition);
     }
 
-    // `-`, `*`, `/`: integer math when both operands are ints, otherwise promote to double.
+    // `-`, `*`, `/`, `%`: integer math when both operands are ints, otherwise promote to double.
     private static object Arithmetic(string op, object? left, object? right)
     {
         if (left is int li && right is int ri)
@@ -65,6 +66,12 @@ public static class ValueOps
                         throw new FcRuntimeException("Division by zero");
                     }
                     return li / ri;
+                case Syntax.Modulo:
+                    if (ri == 0)
+                    {
+                        throw new FcRuntimeException("Modulo by zero");
+                    }
+                    return li % ri;
             }
         }
 
@@ -80,6 +87,12 @@ public static class ValueOps
                     throw new FcRuntimeException("Division by zero");
                 }
                 return l / r;
+            case Syntax.Modulo:
+                if (r == 0)
+                {
+                    throw new FcRuntimeException("Modulo by zero");
+                }
+                return l % r;
         }
 
         throw new FcRuntimeException($"Unknown operator '{op}'");

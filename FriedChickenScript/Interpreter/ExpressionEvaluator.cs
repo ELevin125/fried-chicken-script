@@ -53,10 +53,6 @@ public class ExpressionEvaluator
             case NodeType.BinaryExpression:
                 return EvaluateBinary(node, env);
 
-            case NodeType.ReadIOExpression:
-                // Read the line from the console, default to empty string if null, and return it
-                return Console.ReadLine() ?? "";
-
             default:
                 throw new FcRuntimeException($"Cannot evaluate node: {node.Type}");
         }
