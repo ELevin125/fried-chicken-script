@@ -155,6 +155,33 @@ orderUp(menu.length)
 
 ---
 
+## VS Code Syntax Highlighting
+
+A Visual Studio Code syntax highlighting extension is included in the `VScodeSyntaxHighlighting/` directory.
+
+### Option 1 - Install from source
+
+Copy the `VScodeSyntaxHighlighting` folder into your VS Code extensions directory:
+
+| Platform | Location |
+|----------|----------|
+| Windows | `%USERPROFILE%\.vscode\extensions\` |
+| Linux | `~/.vscode/extensions/` |
+| macOS | `~/.vscode/extensions/` |
+
+Restart VS Code and `.fc` files will automatically use Fried Chicken Script syntax highlighting.
+
+### Option 2 - Package as a VSIX
+
+If you have the VS Code Extension Manager (`vsce`) installed:
+
+```bash
+cd VScodeSyntaxHighlighting
+vsce package
+code --install-extension *.vsix
+```
+---
+
 ## Examples
 
 The `examples/` directory contains sample programs if you don't know where to start.
