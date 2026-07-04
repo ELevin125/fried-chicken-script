@@ -32,6 +32,7 @@ public class Interpreter
             [Syntax.Abs] = BuiltinAbs,
             [Syntax.Round] = BuiltinRound,
             [Syntax.Sleep] = BuiltinSleep,
+            [Syntax.Clear] = BuiltinClear,
         };
     }
 
@@ -539,6 +540,18 @@ public class Interpreter
             throw new FcRuntimeException($"'{Syntax.Sleep}' needs a non-negative number of milliseconds");
         }
         Thread.Sleep(ms);
+        return null;
+    }
+
+    // wipeCounter() -> clear the console, then home the cursor; returns EMPTY. Uses ANSI
+    // escapes rather than Console.Clear() so it also works when output is redirected.
+    private static object? BuiltinClear(List<object?> args)
+    {
+        if (args.Count != 0)
+        {
+            throw new FcRuntimeException($"'{Syntax.Clear}' expects no arguments but got {args.Count}");
+        }
+        Console.Write("\x1b[2J\x1b[H");
         return null;
     }
 

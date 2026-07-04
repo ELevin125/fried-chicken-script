@@ -144,6 +144,21 @@ public class MathBuiltinTests
         Assert.Throws<FcRuntimeException>(() => Fc.Run(@"letItCook(""soon"")"));
     }
 
+    // --- wipeCounter (clear) --------------------------------------------------
+
+    [Fact]
+    public void WipeCounterEmitsAClearSequence()
+    {
+        // ANSI clear-screen + cursor-home, so it works even under redirected output.
+        Assert.Contains("\x1b[2J", Fc.Run("wipeCounter()"));
+    }
+
+    [Fact]
+    public void WipeCounterTakesNoArguments()
+    {
+        Assert.Throws<FcRuntimeException>(() => Fc.Run("wipeCounter(1)"));
+    }
+
     // --- reservation ----------------------------------------------------------
 
     [Fact]

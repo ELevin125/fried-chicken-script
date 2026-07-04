@@ -26,6 +26,8 @@ public static class Syntax
     public const string Round = "round";
     // letItCook(ms) — pause execution for a spell (sleep), for pacing output.
     public const string Sleep = "letItCook";
+    // wipeCounter() — clear the console so the next output paints a fresh screen.
+    public const string Clear = "wipeCounter";
 
     // The receiver bound inside a bucket's recipe, referring to the current instance
     // (so a method can read/write its own fields, e.g. `myBucket.pieces`).
