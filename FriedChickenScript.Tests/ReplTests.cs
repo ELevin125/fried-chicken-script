@@ -36,7 +36,7 @@ public class ReplTests
     public void RecipesPersistAndAreCallable()
     {
         var interp = new Interpreter();
-        interp.RunRepl(Parse("recipe sq withSides: n { serve n * n }"));
+        interp.RunRepl(Parse("recipe sq withExtra: n { serve n * n }"));
         Assert.Equal(16, interp.RunRepl(Parse("sq(4)")));
     }
 

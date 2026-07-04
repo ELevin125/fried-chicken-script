@@ -59,7 +59,7 @@
       "patterns": [
         {
           "name": "keyword.control.fc",
-          "match": "\\b(if|else|fryWhile|serve|orderUp|withSides)\\b"
+          "match": "\\b(if|else|fryWhile|serve|orderUp|withExtra)\\b"
         },
         {
           "name": "storage.type.fc",

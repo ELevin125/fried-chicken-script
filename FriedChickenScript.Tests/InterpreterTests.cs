@@ -116,7 +116,7 @@ public class InterpreterTests
     public void FunctionWithParametersAndReturn()
     {
         Assert.Equal("7", Fc.Run(@"
-            recipe addStuff withSides: a, b { serve a + b }
+            recipe addStuff withExtra: a, b { serve a + b }
             orderUp(addStuff(3, 4))"));
     }
 
@@ -124,7 +124,7 @@ public class InterpreterTests
     public void RecursionAndReturnFromInsideIf()
     {
         Assert.Equal("120", Fc.Run(@"
-            recipe factorial withSides: n {
+            recipe factorial withExtra: n {
                 if (n < 2) { serve 1 }
                 serve n * factorial(n - 1)
             }
@@ -136,14 +136,14 @@ public class InterpreterTests
     {
         Assert.Equal("9", Fc.Run(@"
             orderUp(square(3))
-            recipe square withSides: n { serve n * n }"));
+            recipe square withExtra: n { serve n * n }"));
     }
 
     [Fact]
     public void WrongArgumentCountThrows()
     {
         Assert.Throws<FcRuntimeException>(() => Fc.Run(@"
-            recipe f withSides: a, b { serve a }
+            recipe f withExtra: a, b { serve a }
             orderUp(f(1))"));
     }
 
@@ -174,7 +174,7 @@ public class InterpreterTests
                 ingredient content = """"
                 ingredient isSpicy = RAW
             }
-            recipe cook withSides: pieces, spicy {
+            recipe cook withExtra: pieces, spicy {
                 Meal m
                 m.content = ""chicken x "" + pieces
                 m.isSpicy = spicy

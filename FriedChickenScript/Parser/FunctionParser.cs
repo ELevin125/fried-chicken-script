@@ -10,7 +10,7 @@ public static class FunctionParser
         return returnNode;
     }
 
-    // recipe name withSides: p1, p2 { ... }
+    // recipe name withExtra: p1, p2 { ... }
     // recipe name(p1, p2)        { ... }
     // recipe name                { ... }
     public static ASTNode ParseDeclaration(Parser p)

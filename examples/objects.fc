@@ -11,7 +11,7 @@ bucket Meal {
     ingredient isSpicy = RAW
 }
 
-recipe cook withSides: pieces, spicy {
+recipe cook withExtra: pieces, spicy {
     Meal m
     m.content = "chicken x " + pieces
     m.isSpicy = spicy
