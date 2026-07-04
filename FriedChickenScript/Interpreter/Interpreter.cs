@@ -205,6 +205,38 @@ public class Interpreter
         return null;
     }
 
+    // Called from ExpressionEvaluator for `instance.method(args)`. The instance is bound to
+    // the `myBucket` receiver so the body can read and write its own fields.
+    public object? CallMethod(FcObject instance, string methodName, List<object?> args)
+    {
+        if (!types.TryGetValue(instance.TypeName, out var type))
+            throw new FcRuntimeException($"Unknown bucket type '{instance.TypeName}'");
+        if (!type.Methods.TryGetValue(methodName, out var method))
+            throw new FcRuntimeException($"'{instance.TypeName}' has no recipe '{methodName}'");
+        if (method.Parameters.Count != args.Count)
+            throw new FcRuntimeException(
+                $"Recipe '{methodName}' expects {method.Parameters.Count} argument(s) but got {args.Count}");
+
+        // Like top-level recipes, methods close over globals; additionally the receiver and
+        // the arguments are bound in the call scope.
+        Environment callEnv = new Environment(globals);
+        callEnv.Define(Syntax.Self, instance);
+        for (int i = 0; i < method.Parameters.Count; i++)
+        {
+            callEnv.Define(method.Parameters[i], args[i]);
+        }
+
+        try
+        {
+            Execute(method.Body, callEnv);
+        }
+        catch (ReturnException r)
+        {
+            return r.Value;
+        }
+        return null;
+    }
+
     private void ExecuteInstantiation(ASTNode node, Environment env)
     {
         string typeName = node.Value!;
@@ -254,19 +286,30 @@ public class Interpreter
 
     private void RegisterFunction(ASTNode node)
     {
-        var parameters = node.Children
-            .Where(c => c.Type == NodeType.Parameter)
-            .Select(c => c.Value!)
-            .ToList();
-        var body = node.Children.First(c => c.Type == NodeType.Block);
-        functions[node.Value!] = new Function(node.Value!, parameters, body);
+        functions[node.Value!] = BuildFunction(node);
     }
 
     private void RegisterType(ASTNode node)
     {
         var fields = node.Children
+            .Where(c => c.Type == NodeType.FieldDeclaration)
             .Select(f => new FieldDefinition(f.Value!, f.Children.Count > 0 ? f.Children[0] : null))
             .ToList();
-        types[node.Value!] = new TypeDefinition(node.Value!, fields);
+        var methods = node.Children
+            .Where(c => c.Type == NodeType.FunctionDeclaration)
+            .ToDictionary(m => m.Value!, BuildFunction);
+        types[node.Value!] = new TypeDefinition(node.Value!, fields, methods);
+    }
+
+    // Build a Function from a FunctionDeclaration node — shared by top-level recipes and
+    // bucket methods, which parse identically.
+    private static Function BuildFunction(ASTNode node)
+    {
+        var parameters = node.Children
+            .Where(c => c.Type == NodeType.Parameter)
+            .Select(c => c.Value!)
+            .ToList();
+        var body = node.Children.First(c => c.Type == NodeType.Block);
+        return new Function(node.Value!, parameters, body);
     }
 }

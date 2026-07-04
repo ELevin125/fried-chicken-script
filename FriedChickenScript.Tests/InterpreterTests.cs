@@ -186,6 +186,59 @@ public class InterpreterTests
     }
 
     [Fact]
+    public void MethodReadsOwnFieldsThroughReceiver()
+    {
+        Assert.Equal("40", Fc.Run(@"
+            bucket Order {
+                ingredient pieces = 8
+                ingredient price = 5
+                recipe total { serve myBucket.pieces * myBucket.price }
+            }
+            Order myOrder
+            orderUp(myOrder.total())"));
+    }
+
+    [Fact]
+    public void MethodWithParametersMutatesOwnFields()
+    {
+        Assert.Equal(new[] { "12", "COOKED" }, Fc.Lines(@"
+            bucket Order {
+                ingredient pieces = 8
+                ingredient isSpicy = RAW
+                recipe reorder withExtra: count, spicy {
+                    myBucket.pieces = count
+                    myBucket.isSpicy = spicy
+                }
+            }
+            Order myOrder
+            myOrder.reorder(12, COOKED)
+            orderUp(myOrder.pieces)
+            orderUp(myOrder.isSpicy)"));
+    }
+
+    [Fact]
+    public void MethodCanCallAnotherMethodOnItself()
+    {
+        Assert.Equal("16", Fc.Run(@"
+            bucket Order {
+                ingredient pieces = 8
+                recipe total { serve myBucket.pieces * 2 }
+                recipe describe { serve myBucket.total() }
+            }
+            Order myOrder
+            orderUp(myOrder.describe())"));
+    }
+
+    [Fact]
+    public void CallingUndefinedMethodThrows()
+    {
+        Assert.Throws<FcRuntimeException>(() => Fc.Run(@"
+            bucket Order { ingredient pieces = 8 }
+            Order myOrder
+            orderUp(myOrder.total())"));
+    }
+
+    [Fact]
     public void ObjectFieldsDoNotLeakIntoGlobalScope()
     {
         Assert.Throws<FcRuntimeException>(() => Fc.Run(@"

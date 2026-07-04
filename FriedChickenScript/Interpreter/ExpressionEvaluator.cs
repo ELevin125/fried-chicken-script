@@ -105,6 +105,10 @@ public class ExpressionEvaluator
         {
             return CallListMethod(list, node.Value!, args);
         }
+        if (target is FcObject obj)
+        {
+            return interpreter.CallMethod(obj, node.Value!, args);
+        }
         throw new FcRuntimeException($"Value has no method '{node.Value}'");
     }
 

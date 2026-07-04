@@ -25,7 +25,7 @@ public enum NodeType
     WhileStatement,        // child[0] = condition, child[1] = body-Block
 
     // Objects (buckets)
-    BucketDeclaration,     // Value = type name;   FieldDeclaration children
+    BucketDeclaration,     // Value = type name;   FieldDeclaration + FunctionDeclaration (method) children
     FieldDeclaration,      // Value = field name;  optional child[0] = default expression
     ObjectInstantiation,   // Value = type name;   child[0] = Identifier(varName), [child[1] = initializer]
     MemberAccess,          // Value = field name;  child[0] = target expression

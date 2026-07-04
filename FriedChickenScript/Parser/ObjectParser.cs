@@ -6,8 +6,10 @@ public static class ObjectParser
     //   bucket Order {
     //       ingredient recipeName
     //       ingredient pieces = 8
+    //       recipe total { serve myBucket.pieces }
     //   }
-    // Fields are declared with `ingredient name`, optionally with a default value.
+    // Fields are declared with `ingredient name` (optionally with a default value); methods
+    // are declared with `recipe name ... { ... }`, exactly like a top-level recipe.
     public static ASTNode ParseTypeDefinition(Parser p)
     {
         p.Consume(TokenType.Keyword, Syntax.Object);
@@ -17,6 +19,13 @@ public static class ObjectParser
         p.Consume(TokenType.LeftBrace);
         while (p.GetCurrentToken()?.Type != TokenType.RightBrace && p.TokenIndex < p.Tokens.Count)
         {
+            Token? member = p.GetCurrentToken();
+            if (member?.Type == TokenType.Keyword && member.Value == Syntax.Function)
+            {
+                typeNode.AddChild(FunctionParser.ParseDeclaration(p));
+                continue;
+            }
+
             p.Consume(TokenType.Keyword, Syntax.Variable);
             Token fieldName = p.Consume(TokenType.Identifier);
             ASTNode field = new ASTNode(NodeType.FieldDeclaration, fieldName.Value);

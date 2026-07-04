@@ -14,6 +14,10 @@ public static class Syntax
     public const string Print = "orderUp";
     public const string ReadIO = "takeOrder";
 
+    // The receiver bound inside a bucket's recipe, referring to the current instance
+    // (so a method can read/write its own fields, e.g. `myBucket.pieces`).
+    public const string Self = "myBucket";
+
     // Constants
     public const string True = "COOKED";
     public const string False = "RAW";
