@@ -54,6 +54,13 @@ public static class MiscParser
         return loopNode;
     }
 
+    // closeShop — break out of the nearest enclosing fryWhile loop.
+    public static ASTNode ParseBreakStatement(Parser p)
+    {
+        p.Consume(TokenType.Keyword, Syntax.Break);
+        return new ASTNode(NodeType.BreakStatement);
+    }
+
     private static ASTNode ParseBracedBlock(Parser p)
     {
         p.Consume(TokenType.LeftBrace);

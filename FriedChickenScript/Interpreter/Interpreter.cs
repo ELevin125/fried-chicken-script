@@ -31,9 +31,16 @@ public class Interpreter
     {
         Hoist(program);
 
-        foreach (var child in program.Children)
+        try
         {
-            Execute(child, globals);
+            foreach (var child in program.Children)
+            {
+                Execute(child, globals);
+            }
+        }
+        catch (BreakException)
+        {
+            throw BreakOutsideLoop();
         }
     }
 
@@ -45,17 +52,24 @@ public class Interpreter
         Hoist(program);
 
         object? last = null;
-        foreach (var child in program.Children)
+        try
         {
-            if (IsExpression(child))
+            foreach (var child in program.Children)
             {
-                last = Evaluate(child, globals);
+                if (IsExpression(child))
+                {
+                    last = Evaluate(child, globals);
+                }
+                else
+                {
+                    Execute(child, globals);
+                    last = null;
+                }
             }
-            else
-            {
-                Execute(child, globals);
-                last = null;
-            }
+        }
+        catch (BreakException)
+        {
+            throw BreakOutsideLoop();
         }
         return last;
     }
@@ -173,11 +187,21 @@ public class Interpreter
                 break;
 
             case NodeType.WhileStatement:
-                while (ValueOps.Truthy(Evaluate(node.Children[0], env)))
+                try
                 {
-                    Execute(node.Children[1], env);
+                    while (ValueOps.Truthy(Evaluate(node.Children[0], env)))
+                    {
+                        Execute(node.Children[1], env);
+                    }
+                }
+                catch (BreakException)
+                {
+                    // closeShop: leave the loop early.
                 }
                 break;
+
+            case NodeType.BreakStatement:
+                throw new BreakException();
 
             default:
                 throw new FcRuntimeException($"Unhandled statement: {node.Type}");
@@ -212,6 +236,10 @@ public class Interpreter
         {
             return r.Value;
         }
+        catch (BreakException)
+        {
+            throw BreakOutsideLoop();
+        }
         return null;
     }
 
@@ -244,8 +272,17 @@ public class Interpreter
         {
             return r.Value;
         }
+        catch (BreakException)
+        {
+            throw BreakOutsideLoop();
+        }
         return null;
     }
+
+    // A closeShop that escapes to a recipe-call boundary or top level was used outside any
+    // loop; surface it as a clear runtime error rather than letting the signal leak out.
+    private static FcRuntimeException BreakOutsideLoop() =>
+        new FcRuntimeException($"'{Syntax.Break}' can only be used inside a {Syntax.While} loop");
 
     private void ExecuteInstantiation(ASTNode node, Environment env)
     {

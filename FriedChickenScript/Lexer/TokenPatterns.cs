@@ -27,6 +27,7 @@ public static class TokenPatterns
             ($@"\b{Syntax.If}\b",                  TokenType.Keyword),
             ($@"\b{Syntax.Else}\b",                TokenType.Keyword),
             ($@"\b{Syntax.While}\b",               TokenType.Keyword),
+            ($@"\b{Syntax.Break}\b",               TokenType.Keyword),
 
             ($@"\b{Syntax.True}\b",                TokenType.ConstLiteral),
             ($@"\b{Syntax.False}\b",               TokenType.ConstLiteral),

@@ -17,8 +17,9 @@ public enum NodeType
     ReturnStatement,       // child[0] = expression
 
     // Control flow
-    IfStatement,           // child[0] = condition, child[1] = then-Block, [child[2] = else-Block]
+    IfStatement,           // child[0] = condition, child[1] = then-Block, [child[2] = else-Block or else-if IfStatement]
     WhileStatement,        // child[0] = condition, child[1] = body-Block
+    BreakStatement,        // closeShop: stop the nearest enclosing loop
 
     // Objects (buckets)
     BucketDeclaration,     // Value = type name;   FieldDeclaration + FunctionDeclaration (method) children

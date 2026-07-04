@@ -11,6 +11,7 @@ public static class Syntax
     public const string If = "if";
     public const string Else = "else";
     public const string While = "fryWhile";
+    public const string Break = "closeShop";
 
     // Builtins - runtime-provided functions, called like any recipe (name(args)). These are
     // NOT keywords — they are reserved identifiers so a program can't shadow them.
