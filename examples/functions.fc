@@ -1,15 +1,15 @@
 // Recipes: parameters, serve (return), recursion, and return from inside an if
 
-recipe addStuff withExtra: a, b {
+recipe addStuff withSides: a, b {
     serve a + b
 }
 
-recipe factorial withExtra: n {
+recipe factorial withSides: n {
     if (n < 2) {
         serve 1
     }
     serve n * factorial(n - 1)
 }
 
-print(addStuff(3, 4))    // 7
-print(factorial(5))      // 120
+orderUp(addStuff(3, 4))    // 7
+orderUp(factorial(5))      // 120

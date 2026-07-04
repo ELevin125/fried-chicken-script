@@ -6,7 +6,7 @@
 // struct	|	bucket
 // func		|	recipe
 // return	|	serve
-// param	|	withExtras
+// param	|	withSidess
 // while	|	fryWhile
 // true		|	COOKED
 // false	|	RAW
@@ -28,7 +28,7 @@ bucket Meal {
 }
 
 // Function Declaration
-recipe cookChicken withExtras: chickenPieces, isSpicy {
+recipe cookChicken withSidess: chickenPieces, isSpicy {
 	ingredient mealContent = ""
 	
 	ingredient i = 0
@@ -53,5 +53,5 @@ recipe main() {
 
     // Cook Chicken
     Meal myMeal = cookChicken(myBucket.chickenPieces, myBucket.isSpicy)
-	print(myMeal.mealContent)
+	orderUp(myMeal.mealContent)
 }

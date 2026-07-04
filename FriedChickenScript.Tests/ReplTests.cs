@@ -36,7 +36,7 @@ public class ReplTests
     public void RecipesPersistAndAreCallable()
     {
         var interp = new Interpreter();
-        interp.RunRepl(Parse("recipe sq withExtra: n { serve n * n }"));
+        interp.RunRepl(Parse("recipe sq withSides: n { serve n * n }"));
         Assert.Equal(16, interp.RunRepl(Parse("sq(4)")));
     }
 
@@ -65,8 +65,8 @@ public class ReplTests
 
     [Theory]
     [InlineData("ingredient x = 5", true)]
-    [InlineData("print(x)", true)]
-    [InlineData("if (x) { print(1) }", true)]
+    [InlineData("orderUp(x)", true)]
+    [InlineData("if (x) { orderUp(1) }", true)]
     [InlineData("if (x) {", false)]
     [InlineData("recipe f {", false)]
     [InlineData("ingredient x = (2 + 3", false)]

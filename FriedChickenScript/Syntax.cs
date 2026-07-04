@@ -5,13 +5,13 @@ public static class Syntax
     // Keywords
     public const string Variable = "ingredient";
     public const string Function = "recipe";
-    public const string Parameter = "withExtra:";
+    public const string Parameter = "withSides:";
     public const string Object = "bucket";
     public const string Return = "serve";
     public const string If = "if";
     public const string Else = "else";
     public const string While = "fryWhile";
-    public const string Print = "print";
+    public const string Print = "orderUp";
 
     // Constants
     public const string True = "COOKED";

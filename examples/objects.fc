@@ -11,7 +11,7 @@ bucket Meal {
     ingredient isSpicy = RAW
 }
 
-recipe cook withExtra: pieces, spicy {
+recipe cook withSides: pieces, spicy {
     Meal m
     m.content = "chicken x " + pieces
     m.isSpicy = spicy
@@ -21,10 +21,10 @@ recipe cook withExtra: pieces, spicy {
 Order myOrder
 myOrder.pieces = 12
 myOrder.isSpicy = COOKED
-print(myOrder.recipeName)     // Original
-print(myOrder.pieces)         // 12
-print(myOrder.isSpicy)        // COOKED
+orderUp(myOrder.recipeName)     // Original
+orderUp(myOrder.pieces)         // 12
+orderUp(myOrder.isSpicy)        // COOKED
 
 Meal dinner = cook(myOrder.pieces, myOrder.isSpicy)
-print(dinner.content)         // chicken x 12
-print(dinner.isSpicy)         // COOKED
+orderUp(dinner.content)         // chicken x 12
+orderUp(dinner.isSpicy)         // COOKED
