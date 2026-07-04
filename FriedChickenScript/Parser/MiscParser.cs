@@ -26,7 +26,16 @@ public static class MiscParser
         if (p.GetCurrentToken()?.Value == Syntax.Else)
         {
             p.Consume(TokenType.Keyword, Syntax.Else);
-            ifNode.AddChild(ParseBracedBlock(p));
+
+            // `else if (...)` chains by making the else-branch another if-statement
+            if (p.GetCurrentToken()?.Value == Syntax.If)
+            {
+                ifNode.AddChild(ParseIfStatement(p));
+            }
+            else
+            {
+                ifNode.AddChild(ParseBracedBlock(p));
+            }
         }
 
         return ifNode;
